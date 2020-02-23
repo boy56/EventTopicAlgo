@@ -123,7 +123,8 @@ result.to_csv("result/南海航行观点筛选.csv", index=False)
 # 根据news_id检索数据库中的观点
 news_id = [4483186869008140683, 7248578447621953939, 6480790159627461276, 7866372246214921692, 6545522596824015748]
 vps = find_viewpoints_by_news_id(news_id)
-print(vps)
+for v in vps:
+    print(v.viewpoint)
 
 
 
