@@ -115,7 +115,7 @@ with codecs.open("result/ltp_result.txt", "w", "utf-8") as wf:
 '''
 # 根据关键词检索数据
 df = pd.read_csv("data/南海_2018-01-01_2020-02-10.csv")
-result = df[df['original_text'].str.contains('海军|南海|航行')]
+result = df[df['original_text'].str.contains('海军|南海|航行')] # https://blog.csdn.net/htbeker/article/details/79645651
 result.to_csv("result/南海航行观点筛选.csv", index=False)
 # print(df['news_id'])
 '''
