@@ -125,12 +125,13 @@ result.to_csv("result/南海航行观点筛选.csv", index=False)
 theme_name = "南海自由航行"
 news_df = pd.read_csv("data/" + theme_name + "_news.csv")
 news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
-vps = find_viewpoints_by_news_id(news_id, size=10000)   # 从观点库中根据news_id查找对应的观点
+vps = find_viewpoints_by_news_id(news_id, size=3000)   # 从观点库中根据news_id查找对应的观点
+print(type(vps))
 vps_list = []
 for v in vps:
     # print(v.__dict__['_d_'])
     vps_list.append(v.__dict__['_d_'])
 
 vps_df = pd.DataFrame(vps_list)
-vps_df.to_csv("data/" + theme_name + "_views.csv", index=False) # 将观点数据存入文件中
+# vps_df.to_csv("data/" + theme_name + "_views.csv", index=False) # 将观点数据存入文件中
 
