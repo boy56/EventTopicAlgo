@@ -29,6 +29,6 @@ def query_vp_by_news(news_ids):
 
 def find_viewpoints_by_news_id(news_ids=None,size=3000):
     es_client = Elasticsearch(ES_IP_PORT, timeout=600)
-    q = query_vp_by_news(news_ids[:1000])
+    q = query_vp_by_news(news_ids)
     vps = ViewPoint.search().using(es_client).query(q).extra(size=size).execute()
     return vps
