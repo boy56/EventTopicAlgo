@@ -43,7 +43,7 @@ def find_viewpoints_by_news_id(news_ids=None,size=3000):
         for v in vps:
             # print(v.__dict__['_d_'])
             vps_list.append(v.__dict__['_d_'])
-    
+        # print(i," ", len(vps_list))
     # 将[nslices*slice_size:]进行处理
     tmp_id = news_ids[nslices*slice_size:]    # 切片查询   
     q = query_vp_by_news(tmp_id)
