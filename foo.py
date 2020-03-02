@@ -4,7 +4,7 @@ import datetime
 import pandas as pd
 from fuzzywuzzy import fuzz
 from LTPFunc import LTPFunction
-from utils import clean_zh_text
+import utils
 from tqdm import tqdm
 from find_es_vps import find_viewpoints_by_news_id
 
@@ -121,6 +121,7 @@ result.to_csv("result/南海航行观点筛选.csv", index=False)
 # print(df['news_id'])
 '''
 
+'''
 # 根据news_id检索数据库中的观点
 theme_name = "南海自由航行"
 news_df = pd.read_csv("data/" + theme_name + "_news.csv")
@@ -128,4 +129,11 @@ news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点
 vps_list = find_viewpoints_by_news_id(news_id, size=3000)   # 从观点库中根据news_id查找对应的观点
 vps_df = pd.DataFrame(vps_list)
 vps_df.to_csv("data/" + theme_name + "_views.csv", index=False) # 将观点数据存入文件中
+'''
 
+# 根据新闻评论计算新闻影响力指数
+theme_name = "南海自由航行"
+news_df = pd.read_csv("data/" + theme_name + "_news.csv")
+result = utils.news_comment_deal(news_df)
+with codecs.open("result/news_influence.json", "w", "utf-8") as wf:
+    json.dump(result, wf, indent=4)
