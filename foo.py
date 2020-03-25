@@ -131,9 +131,11 @@ vps_df = pd.DataFrame(vps_list)
 vps_df.to_csv("data/" + theme_name + "_views.csv", index=False) # 将观点数据存入文件中
 '''
 
+'''
 # 根据新闻评论计算新闻影响力指数
 theme_name = "南海自由航行"
 news_df = pd.read_csv("data/" + theme_name + "_news.csv")
 result = utils.news_comment_deal(news_df)
 with codecs.open("result/news_influence.json", "w", "utf-8") as wf:
     json.dump(result, wf, indent=4)
+'''
