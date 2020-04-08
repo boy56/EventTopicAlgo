@@ -64,10 +64,19 @@ def news_comment_deal(news_df):
 def text_sim(s1, s2):
     return fuzz.ratio(s1, s2)
 
-
-# keep English, digital and Chinese
-def clean_zh_text(text):
-    text = text.replace('，',',').replace('。','.').replace('？','?').replace('！','!').replace('：',':') # 将英文标点转换为中文标点
-    comp = re.compile('[^A-Z^.^,^!^?^:^a-z^0-9^\u4e00-\u9fa5]')
-    return comp.sub('', text)
+# 文本清洗
+def clean_zh_text(text, cleantype=1):
+    result = text
+    if cleantype == 1:
+        result = ''.join(text.split()) #split方法中不带参数时，表示分割所有换行符、制表符、空格
+        # content = content.replace(u'\u3000', u'').replace('\n','').replace(' ','').replace('\r','')
+    elif cleantype == 2:
+        
+        # keep English, digital and Chinese
+        text = text.replace('，',',').replace('。','.').replace('？','?').replace('！','!').replace('：',':') # 将英文标点转换为中文标点
+        comp = re.compile('[^A-Z^.^,^!^?^:^a-z^0-9^\u4e00-\u9fa5]')
+        result = comp.sub('', text)
+    else:
+        print("type error in utils.clean_zh_text")
+    return result
 
