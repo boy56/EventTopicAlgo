@@ -11,8 +11,8 @@ from gensim.models import lsimodel, ldamodel, tfidfmodel
 #from constants import Word2vecPath
 
 # word2vec_path = "/home/LAB/yanhao/data/word2vec/zh_wiki_1G/wiki_chs_vec"
-#Word2vecPath=""
-#word2vec = Word2Vec.load(Word2vecPath)
+# Word2vecPath=""
+# word2vec = Word2Vec.load(Word2vecPath)
 
 
 def tfidf_bow(corpus_bow):

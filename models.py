@@ -43,3 +43,24 @@ class NewsInfo(Model):
         database = mysql_db
         # db_table = "newsinfo"
 
+
+class ViewsInfo(Model):
+    # 设置自增的id主键
+    viewid = AutoField()
+
+    personname = CharField()  # 专家名
+    orgname = CharField() # 机构名
+    pos = CharField() # 职位
+    verb = CharField() # 动词
+    viewpoint = TextField(default='') # 观点
+    # person_id = CharField()
+    # org_id = CharField()
+    # newsid = ForeignKeyField(NewsInfo)    # 一直报错
+    newsid = CharField(max_length = 64) 
+    sentiment = FloatField() # 情绪
+    time = DateTimeField()
+    original_text = TextField(default='')
+
+    class Meta:
+        database = mysql_db
+        # db_table = "viewsInfo"
