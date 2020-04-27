@@ -6,6 +6,7 @@ mysql_db = MySQLDatabase(
     user = 'root', # string
     host = '127.0.0.1', # string
     port = 3306, # int
+    charset = 'utf8' # encode
 )
 
 class NewsInfo(Model):
