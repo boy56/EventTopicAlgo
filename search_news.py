@@ -49,7 +49,7 @@ def get_news_data(fout):
             continue
         count=count+1
         if result == {}:
-            continue;
+            continue
         row = []
         row.append(data[i]['_id'])
         for item in name[1:]:
