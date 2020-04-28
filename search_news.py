@@ -3,6 +3,8 @@ import datetime
 import  csv
 import pandas as pd                         #导入pandas包
 import os
+import codecs
+
 HBASE_IP = '10.1.1.16'
 HBASE_PORT = 9090
 HBASE_TABLE = 'terren'
@@ -21,6 +23,7 @@ def get_news_row_key(doc_id, time_str):
         time = datetime.datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
     time_str = (time + datetime.timedelta(hours=8)).strftime("%Y%m%d%H%M%S")
     return time_str + "-" + doc_id
+
 def get_hbase_row(doc_id, time_str):
     #r = map(get_news_row_key,doc_id_list, time_str_list)
     r=get_news_row_key(doc_id=doc_id,time_str=time_str)
@@ -32,11 +35,47 @@ def get_hbase_row(doc_id, time_str):
         value_s=str(result[key],encoding='utf-8')
         info[key_s]=value_s
     return info
-def get_news_data(fout):
+
+# fout为输出文件名称, fkeywords为需要爬取的关键词字典名称
+def get_news_data(fout, fkeywords):
     name=['news_id','app', 'area', 'comments', 'content', 'country', 'customer', 'emotion', 'entities', 'keyword', 'location', 'pageview', 'phonecompany', 'publishDay', 'referdomain', 'searchWord', 'searchengine', 'sourceType', 'time', 'title', 'url', 'userview', 'words']
     csvFile = open(fout, "w",newline='',encoding='utf-8')  # 创建csv文件
     writer = csv.writer(csvFile)  # 创建写的对象
-    body_={"query":{"bool":{"must":[{"query_string":{"default_field":"_all","query":"南海"}},{"query_string":{"default_field":"_all","query":"航行"}},{"query_string":{"default_field":"_all","query":"自由"}}],"must_not":[],"should":[]}},"from":0,"size":5000,"sort":[],"aggs":{}}
+
+    query_list = []
+    # 读取待查询的关键词
+    with codecs.open(fkeywords,"r","UTF-8") as rf:
+        for line in rf.readlines():
+            word = line.strip()
+            query_list.append(
+                {"query_string":{"default_field":"_all","query":word}}
+            )
+
+'''
+[
+    {"query_string":{"default_field":"_all","query":"南海"}},
+    {"query_string":{"default_field":"_all","query":"航行"}},
+    {"query_string":{"default_field":"_all","query":"自由"}}
+],
+'''
+
+    body_=
+    {
+        "query":
+        {
+            "bool":
+            {
+                "must": query_list
+
+                "must_not":[],
+                "should":[]
+            }
+        },
+        "from":0,
+        "size":5000,
+        "sort":[],
+        "aggs":{}
+    }
     res=es.search(index="terren_v2",body=body_)
     data=res['hits']['hits']
     print(len(data))
@@ -60,4 +99,4 @@ def get_news_data(fout):
         writer.writerow(row)
     csvFile.close()
     print(count)
-get_news_data('新闻列表.csv')
+get_news_data('南海相关新闻列表.csv', 'dict/南海相关查询词.txt')
