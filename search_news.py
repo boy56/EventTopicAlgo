@@ -50,32 +50,24 @@ def get_news_data(fout, fkeywords):
             query_list.append(
                 {"query_string":{"default_field":"_all","query":word}}
             )
-
-'''
-[
-    {"query_string":{"default_field":"_all","query":"南海"}},
-    {"query_string":{"default_field":"_all","query":"航行"}},
-    {"query_string":{"default_field":"_all","query":"自由"}}
-],
-'''
-
-    body_=
-    {
-        "query":
-        {
-            "bool":
+            break
+    # print(query_list)
+    body_={
+            "query":
             {
-                "must": query_list
+                "bool":
+                {
+                    "must": query_list,
 
-                "must_not":[],
-                "should":[]
-            }
-        },
-        "from":0,
-        "size":5000,
-        "sort":[],
-        "aggs":{}
-    }
+                    "must_not":[],
+                    "should":[]
+                }
+            },
+            "from":0,
+            "size":5000,
+            "sort":[],
+            "aggs":{}
+        }
     res=es.search(index="terren_v2",body=body_)
     data=res['hits']['hits']
     print(len(data))
@@ -99,4 +91,4 @@ def get_news_data(fout, fkeywords):
         writer.writerow(row)
     csvFile.close()
     print(count)
-get_news_data('南海相关新闻列表.csv', 'dict/南海相关查询词.txt')
+get_news_data('data/南海相关新闻列表.csv', 'dict/南海相关查询词.txt')
