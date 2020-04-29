@@ -41,18 +41,20 @@ def get_news_data(fout, fkeywords):
     name=['news_id','app', 'area', 'comments', 'content', 'country', 'customer', 'emotion', 'entities', 'keyword', 'location', 'pageview', 'phonecompany', 'publishDay', 'referdomain', 'searchWord', 'searchengine', 'sourceType', 'time', 'title', 'url', 'userview', 'words']
     csvFile = open(fout, "w",newline='',encoding='utf-8')  # 创建csv文件
     writer = csv.writer(csvFile)  # 创建写的对象
-
-    query_list = []
+    
     # 读取待查询的关键词
+    query_list = []
     with codecs.open(fkeywords,"r","UTF-8") as rf:
         for line in rf.readlines():
             word = line.strip()
             query_list.append(
                 {"query_string":{"default_field":"_all","query":word}}
             )
-            break
+            break # 针对关键词是一个并联关系
     # print(query_list)
-    body_={
+
+    # 构建查询体
+    body_ = {
             "query":
             {
                 "bool":
@@ -68,9 +70,11 @@ def get_news_data(fout, fkeywords):
             "sort":[],
             "aggs":{}
         }
-    res=es.search(index="terren_v2",body=body_)
-    data=res['hits']['hits']
+    res = es.search(index="terren_v2",body=body_)
+    data = res['hits']['hits']
     print(len(data))
+
+    # 将数据写入fout
     writer.writerow(name)  # 写入列的名称
     count=0
     for i in range(len(data)):
@@ -91,4 +95,7 @@ def get_news_data(fout, fkeywords):
         writer.writerow(row)
     csvFile.close()
     print(count)
-get_news_data('data/南海相关新闻列表.csv', 'dict/南海相关查询词.txt')
+
+# 主函数
+if __name__ == "__main__":    
+    get_news_data('data/南海相关新闻列表.csv', 'dict/南海相关查询词.txt')
