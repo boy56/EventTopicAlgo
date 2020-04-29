@@ -16,7 +16,7 @@ def newscsvtosql(path, theme, datatype=1):
     df['time'] = pd.to_datetime(df['time'])
     df = df.fillna('')  # 填充NA数据
     classifyFunc = ClassifyFunc()
-
+    # print(df.shape)
     # 遍历读取处理
     news_data = []
     for index, row in df.iterrows():
@@ -46,6 +46,7 @@ def newscsvtosql(path, theme, datatype=1):
 
         news_data.append(tmp)
 
+    # print(len(news_data))
     # write data to mysql
     mysql_db.connect()
     
@@ -58,14 +59,15 @@ def newscsvtosql(path, theme, datatype=1):
     # 根据切片分批次插入
     slice_size = 300    # 切片大小
     nslices = math.floor(len(news_data) / slice_size)
-    for i in range(0, nslices-1):
+    
+    for i in range(0, nslices):
         with mysql_db.atomic():
             NewsInfo.insert_many(news_data[i * slice_size: (i + 1) * slice_size]).execute() # 批量插入
-
+        # print(i)
     # 插入最后一个切片的数据
     with mysql_db.atomic():
         NewsInfo.insert_many(news_data[nslices*slice_size:]).execute() # 批量插入
-
+    # print(nslices)
     mysql_db.close()
 
 # 观点csv导入mysql, 默认文件类型为经过vps查询得到的观点数据列表
@@ -103,7 +105,7 @@ def viewscsvtosql(path, datatype=1):
     # 根据切片分批次插入
     slice_size = 300    # 切片大小
     nslices = math.floor(len(news_data) / slice_size)
-    for i in range(0, nslices-1):
+    for i in range(0, nslices):
         with mysql_db.atomic():
             ViewsInfo.insert_many(news_data[i * slice_size: (i + 1) * slice_size]).execute() # 批量插入
 
@@ -117,7 +119,7 @@ def viewscsvtosql(path, datatype=1):
 # 数据库建库建表
 if __name__ == "__main__":
     
-    newscsvtosql("data/南海自由航行_news_newlabel.csv",'南海')
+    # newscsvtosql("data/南海自由航行_news_newlabel.csv",'南海')
     viewscsvtosql('data/南海自由航行_views.csv')
 
    
