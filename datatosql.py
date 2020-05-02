@@ -119,7 +119,7 @@ def viewscsvtosql(path, datatype=1):
 # 数据库建库建表
 if __name__ == "__main__":
     
-    # newscsvtosql("data/南海自由航行_news_newlabel.csv",'南海')
+    newscsvtosql("data/南海自由航行_news_newlabel.csv",'南海')
     viewscsvtosql('data/南海自由航行_views.csv')
 
    
