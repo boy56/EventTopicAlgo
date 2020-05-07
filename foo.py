@@ -115,6 +115,11 @@ for per in tqdm(views_df['person_name']):
             per_country_dict[per] = countrys[0]
 print(total_count)
 print(non_count)
+
+# 保存{人名:国家}字典
+pklf = open("dict/per_country.pkl","w") 
+pickle.dump(per_country_dict, pklf) 
+
 with codecs.open("result/per_country.txt","w","utf-8") as wf:
     for key, value in per_country_dict.items():
         wf.write(key + ": " + value + "\n")
