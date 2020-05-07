@@ -97,18 +97,24 @@ import requests
 
 baseurl = "http://10.1.1.56:9000/eav?"
 views_df = pd.read_csv("data/南海自由航行_views.csv")
+views_df = views_df.dropna(subset=["person_name"])
 per_country_dict = {}
 total_count = 0
 non_count = 0 # 没有检索出来的人名
-for per in views_df['person_name']:
+for per in tqdm(views_df['person_name']):
+    # print(per)
     if per not in per_country_dict:
         total_count += 1
         result = requests.get(baseurl + "entity=" + per + "&attribute=国籍")
-        if result.text == "":
+        # print(type(result.text))
+        countrys = json.loads(result.text)
+        if len(countrys) == 0:
+            per_country_dict[per] = 'N'
             non_count += 1
         else:
-            per_country_dict[per] = result.text
-
+            per_country_dict[per] = countrys[0]
+print(total_count)
+print(non_count)
 with codecs.open("result/per_country.txt","w","utf-8") as wf:
     for key, value in per_country_dict.items():
         wf.write(key + ": " + value + "\n")
