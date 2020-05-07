@@ -40,10 +40,6 @@ def newscsvtosql(path, theme, datatype=1):
         tmp['content_label'] = row['content_label']
         tmp['country_label'] = row['country_label']
 
-        # 运行分类算法得到相应标签
-        # tmp['content_label'] = classifyFunc.classify_title(title_words, 2)
-        # tmp['country_label'] = classifyFunc.classify_title(title_words, 2)
-
         news_data.append(tmp)
 
     # print(len(news_data))

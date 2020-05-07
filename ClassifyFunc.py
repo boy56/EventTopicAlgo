@@ -2,9 +2,9 @@ import codecs
 from typing import Iterator, List, Dict
 
 class ClassifyFunc:
-    def __init__(self):
+    def __init__(self, theme):
         self.word_country_dict = self._load_dict("dict/国家分类.txt", dict_type=1)    # 国家关键词字典
-        self.word_content_dict = self._load_dict("dict/内容分类.txt", dict_type=2)    # 内容关键词字典
+        self.word_content_dict = self._load_dict("dict/" + theme + "新闻分类.txt", dict_type=2)    # 内容关键词字典
 
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, 'instance'):
@@ -25,9 +25,9 @@ class ClassifyFunc:
 
 
 
-    # 根据新闻标题进行分类, dict_type=1为国家标签的分类, dict_type=2为事件标签的分类
+    # 根据新闻标题进行分类, dict_type=0为事件标签的分类, dict_type=1为国家标签的分类, 
     # 返回值为标签类型
-    def classify_title(self, title_words: List[str], dict_type:int = 1) -> str:
+    def classify_title(self, title: str, dict_type:int = 1) -> str:
         # 首先加载关键词字典
         category_dict = self.word_country_dict if dict_type==1 else self.word_content_dict    # 加载关键词字典
         
@@ -38,8 +38,8 @@ class ClassifyFunc:
             for w in keywords:
                 word_category_dict[w] = category
 
-        for w in title_words:
-            if w in word_category_dict:
+        for w in word_category_dict.keys():
+            if w in title:
                 result_set.add(word_category_dict[w])
 
         if len(result_set) == 0:

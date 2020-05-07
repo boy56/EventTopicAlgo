@@ -63,55 +63,6 @@ with codecs.open("data/南海航行自由.txt",'r','utf-8') as f:
 print(len(title_list))
 '''
 
-
-'''
-# 依据LTP工具提取人物、地点、机构
-person_set = set()
-location_set = set()
-organization_set = set()
-result_list = []
-ltpFunc = LTPFunction()
-
-df = pd.read_csv("data/南海自由航行_去重.csv")
-for index, row in tqdm(df.iterrows()):
-    try:
-        # title = clean_zh_text(row['title']) # 清理文本数据
-        title = row['title']
-        # text = clean_zh_text(row['text'])   # 清理文本数据
-        text = row['text']   
-    
-        title_words = ltpFunc.ltp_seg(title)    # 对标题分词
-        title_pos = ltpFunc.ltp_pos(title_words)    # 对标题进行词性标注
-        title_per, title_loc, title_org = ltpFunc.ltp_ner(title_words, title_pos)   # 对标题进行实体抽取
-
-        text_words = ltpFunc.ltp_seg(text)  # 对正文进行分词
-        text_pos = ltpFunc.ltp_pos(text_words)  # 对正文进行词性标注
-        text_per, text_loc, text_org = ltpFunc.ltp_ner(text_words, text_pos)    # 对正文进行词性标注
-
-        tmp = {
-            'title': title,
-            'text': text,
-            'title_words': title_words,
-            'title_per': title_per,
-            'title_loc': title_loc,
-            'title_org': title_org,
-            'text_words': text_words,
-            'text_per': text_per,
-            'text_loc': text_loc,
-            'text_org': text_org
-        }
-    except:
-        print(row)
-    result_list.append(tmp)
-
-# 将处理结果输出到文件查看效果
-with codecs.open("result/ltp_result.txt", "w", "utf-8") as wf:
-    for t in result_list:
-        for key in t.keys():
-            wf.write(key + ": " + str(t[key]) + "\n")
-        wf.write("\n")
-'''
-
 '''
 # 根据关键词检索数据
 df = pd.read_csv("data/南海_2018-01-01_2020-02-10.csv")
@@ -139,3 +90,26 @@ result = utils.news_comment_deal(news_df)
 with codecs.open("result/news_influence.json", "w", "utf-8") as wf:
     json.dump(result, wf, indent=4)
 '''
+
+# 根据bd56部署的知识图谱查询 专家人名信息/机构信息, 对观点数据进行补全
+import requests
+# result = requests.get("http://10.1.1.56:9000/eav?entity=李华敏&attribute=国籍")
+
+baseurl = "http://10.1.1.56:9000/eav?"
+views_df = pd.read_csv("data/南海自由航行_views.csv")
+per_country_dict = {}
+total_count = 0
+non_count = 0 # 没有检索出来的人名
+for per in views_df['person_name']:
+    if per not in per_country_dict:
+        total_count += 1
+        result = requests.get(baseurl + "entity=" + per + "&attribute=国籍")
+        if result.text == "":
+            non_count += 1
+        else:
+            per_country_dict[per] = result.text
+
+with codecs.open("result/per_country.txt","w","utf-8") as wf:
+    for key, value in per_country_dict.items():
+        wf.write(key + ": " + value + "\n")
+
