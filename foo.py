@@ -6,7 +6,7 @@ from fuzzywuzzy import fuzz
 from LTPFunc import LTPFunction
 import utils
 from tqdm import tqdm
-from find_es_vps import find_viewpoints_by_news_id
+import pickle
 
 '''
 # 将json数据转换为csv格式, 并根据文章内容进行去重
@@ -117,7 +117,7 @@ print(total_count)
 print(non_count)
 
 # 保存{人名:国家}字典
-pklf = open("dict/per_country.pkl","w") 
+pklf = open("dict/per_country.pkl","wb") 
 pickle.dump(per_country_dict, pklf) 
 
 with codecs.open("result/per_country.txt","w","utf-8") as wf:
