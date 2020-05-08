@@ -113,6 +113,7 @@ def findCountry(entity):
         else:
             return "N"
 
+views_df = pd.read_csv("data/南海自由航行_views.csv")
 total_count = 0
 non_count = 0 # 没有检索出来的人名
 for per in tqdm(views_df['person_name']):
@@ -120,6 +121,7 @@ for per in tqdm(views_df['person_name']):
     if per not in per_country_dict:
         total_count += 1
         country = findCountry(per)
+        if country == 'N': non_count += 1
         per_country_dict[per] = country
         
 print(total_count)
