@@ -103,7 +103,9 @@ def findCountry(entity):
         return r[0]
     else:
         result = requests.get("https://api.ownthink.com/kg/knowledge?entity=" + entity)
-        country = [i[1] if i[0] == "国籍" else "" for i in json.loads(result.text)["data"]["avp"]]
+        result = json.loads(result.text)
+        if 'avp' not in result['data']: return 'N'
+        country = [i[1] if i[0] == "国籍" else "" for i in result["data"]["avp"]]
         r = []
         for i in country:
             if i != "":
@@ -112,13 +114,17 @@ def findCountry(entity):
             return r[0]
         else:
             return "N"
+        
 
 views_df = pd.read_csv("data/南海自由航行_views.csv")
+per_country_dict = {}
 total_count = 0
 non_count = 0 # 没有检索出来的人名
 for per in tqdm(views_df['person_name']):
     # print(per)
+    if not isinstance(per, str): continue # 不是字符串类型则跳过, 即处理专家名为空的情况
     if per not in per_country_dict:
+        # print(per)
         total_count += 1
         country = findCountry(per)
         if country == 'N': non_count += 1
@@ -127,11 +133,11 @@ for per in tqdm(views_df['person_name']):
 print(total_count)
 print(non_count)
 
-'''
+
 # 保存{人名:国家}字典
 pklf = open("dict/per_country.pkl","wb") 
 pickle.dump(per_country_dict, pklf) 
-'''
+
 with codecs.open("result/per_country.txt","w","utf-8") as wf:
     for key, value in per_country_dict.items():
         wf.write(key + ": " + value + "\n")
