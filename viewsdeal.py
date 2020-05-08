@@ -11,6 +11,7 @@ from elasticsearch_dsl import Document,Q
 from elasticsearch import Elasticsearch
 import math
 import pickle
+import pandas as pd
 
 ES_IP = '10.1.1.36'
 ES_PORT = 9200
@@ -102,6 +103,16 @@ if __name__ == "__main__":
     theme_name = "朝核"
     news_df = pd.read_csv("data/" + theme_name + "_news_newlabel.csv")
 
+    # 加载之前已经存在的字典
+    pkl_rf = open('dict/per_country.pkl','rb')
+    per_country_dict = pickle.load(pkl_rf)
+    print(type(per_country_dict))
+
+    for key, value in per_country_dict.items():
+        print(key + ": " + value)
+        break
+    
+    '''
     # 根据news_id检索数据库中的观点
     news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
     vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
@@ -111,9 +122,6 @@ if __name__ == "__main__":
     
     
     # views中per为空的处理
-
-    pkl_rf = open('dict/per_country.pkl','rb')
-    per_country_dict = pickle.load(pkl_rf)
 
     for per in tqdm(views_df['person_name']):
         if per not in per_country_dict:
@@ -130,15 +138,6 @@ if __name__ == "__main__":
     pkl_wf = open("dict/per_country.pkl","w") 
     pickle.dump(per_country_dict, pkl_wf) 
 
-
-    '''
-    # 根据bd56部署的知识图谱查询 专家人名信息/机构信息, 对观点数据进行补全
-    import requests
-
-    # result = requests.get("http://10.1.1.56:9000/eav?entity=李华敏&attribute=国籍")
-    baseurl = "http://10.1.1.56:9000/eav?"
-
-    print(result.text)
 
     # 根据专家名字增加国家字段
     vps_df.to_csv("data/" + theme_name + "_views.csv", index=False) # 将观点数据存入文件中

@@ -95,31 +95,41 @@ with codecs.open("result/news_influence.json", "w", "utf-8") as wf:
 import requests
 # result = requests.get("http://10.1.1.56:9000/eav?entity=李华敏&attribute=国籍")
 
-baseurl = "http://10.1.1.56:9000/eav?"
-views_df = pd.read_csv("data/南海自由航行_views.csv")
-views_df = views_df.dropna(subset=["person_name"])
-per_country_dict = {}
+# 根据ownthink知识图谱查找人名所对应的国籍
+def findCountry(entity):
+    result = requests.get("http://10.1.1.56:9000/eav?entity=" + entity + "&attribute=国籍")
+    r = json.loads(result.text)
+    if r != []:
+        return r[0]
+    else:
+        result = requests.get("https://api.ownthink.com/kg/knowledge?entity=" + entity)
+        country = [i[1] if i[0] == "国籍" else "" for i in json.loads(result.text)["data"]["avp"]]
+        r = []
+        for i in country:
+            if i != "":
+                r.append(i)
+        if r != []:
+            return r[0]
+        else:
+            return "N"
+
 total_count = 0
 non_count = 0 # 没有检索出来的人名
 for per in tqdm(views_df['person_name']):
     # print(per)
     if per not in per_country_dict:
         total_count += 1
-        result = requests.get(baseurl + "entity=" + per + "&attribute=国籍")
-        # print(type(result.text))
-        countrys = json.loads(result.text)
-        if len(countrys) == 0:
-            per_country_dict[per] = 'N'
-            non_count += 1
-        else:
-            per_country_dict[per] = countrys[0]
+        country = findCountry(per)
+        per_country_dict[per] = country
+        
 print(total_count)
 print(non_count)
 
+'''
 # 保存{人名:国家}字典
 pklf = open("dict/per_country.pkl","wb") 
 pickle.dump(per_country_dict, pklf) 
-
+'''
 with codecs.open("result/per_country.txt","w","utf-8") as wf:
     for key, value in per_country_dict.items():
         wf.write(key + ": " + value + "\n")
