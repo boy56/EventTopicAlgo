@@ -26,13 +26,13 @@ class NewsInfo(Model):
     url = CharField()
     customer = CharField()  # 新闻的媒体分布
     emotion = IntegerField()    # 新闻情绪
-    entities = CharField()  # 涉及实体
-    keyword = CharField() # 关键词
+    # entities = CharField()  # 涉及实体
+    # keyword = CharField() # 关键词
     location = CharField() # 地点
-    pageview = IntegerField() # 页面点击量
-    userview = IntegerField() # 用户访问量
+    # pageview = IntegerField() # 页面点击量
+    # userview = IntegerField() # 用户访问量
     # searchword = CharField()
-    words = CharField()
+    # words = CharField()
 
     # 处理得到字段
     theme_label = CharField()
@@ -50,6 +50,7 @@ class ViewsInfo(Model):
     viewid = AutoField()
 
     personname = CharField()  # 专家名
+    country = CharField() # 国家
     orgname = CharField() # 机构名
     pos = CharField() # 职位
     verb = CharField() # 动词

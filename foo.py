@@ -192,11 +192,12 @@ views_df.to_csv("data/南海自由航行_new_views.csv", index=False) # 将增�
 '''
 
 theme_name = "南海"
-views_df = pd.read_csv("data/南海自由航行_new_views.csv")
+views_df = pd.read_csv("data/南海自由航行_views.csv")
 # 统计该专题下的{国家-观点数量分布}
 
 country_view_dict = {}
 for country in views_df["country"]:
+    if country is "N": continue
     if country in country_view_dict:
         country_view_dict[country] += 1
     else:

@@ -7,7 +7,6 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from models import NewsInfo, ViewsInfo,mysql_db
 import math
-from ClassifyFunc import ClassifyFunc
 
 # 新闻csv导入mysql, 默认文件类型为从Hbase导出的数据
 def newscsvtosql(path, theme, datatype=1):
@@ -15,7 +14,6 @@ def newscsvtosql(path, theme, datatype=1):
     df = pd.read_csv(path)
     df['time'] = pd.to_datetime(df['time'])
     df = df.fillna('')  # 填充NA数据
-    classifyFunc = ClassifyFunc()
     # print(df.shape)
     # 遍历读取处理
     news_data = []
@@ -28,14 +26,13 @@ def newscsvtosql(path, theme, datatype=1):
         tmp['url'] = row['url']
         tmp['customer'] = row['customer']
         tmp['emotion'] = row['emotion']
-        tmp['entities'] = row['entities']
-        tmp['keyword'] = row['keyword']
+        # tmp['entities'] = row['entities']
+        # tmp['keyword'] = row['keyword']
         tmp['location'] = row['location']
-        tmp['pageview'] = row['pageview']
-        tmp['userview'] = row['userview']
-        tmp['words'] = row['words']
+        # tmp['pageview'] = row['pageview']
+        # tmp['userview'] = row['userview']
+        # tmp['words'] = row['words']
 
-        # 需要计算得到的字段
         tmp['theme_label'] = theme
         tmp['content_label'] = row['content_label']
         tmp['country_label'] = row['country_label']
@@ -78,6 +75,7 @@ def viewscsvtosql(path, datatype=1):
     for index, row in df.iterrows():
         tmp = {}
         tmp['personname'] = row['person_name']
+        tmp['country'] = row['country']
         tmp['orgname'] = row['org_name']
         tmp['pos'] = row['pos']
         tmp['verb'] = row['verb']
@@ -114,7 +112,7 @@ def viewscsvtosql(path, datatype=1):
 
 # 数据库建库建表
 if __name__ == "__main__":
-    
+    theme_name = "南海"
     newscsvtosql("data/南海自由航行_news_newlabel.csv",'南海')
     viewscsvtosql('data/南海自由航行_views.csv')
 
