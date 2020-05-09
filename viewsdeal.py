@@ -86,7 +86,9 @@ def findCountry(entity):
         return r[0]
     else:
         result = requests.get("https://api.ownthink.com/kg/knowledge?entity=" + entity)
-        country = [i[1] if i[0] == "国籍" else "" for i in json.loads(result.text)["data"]["avp"]]
+        result = json.loads(result.text)
+        if 'avp' not in result['data']: return 'N'
+        country = [i[1] if i[0] == "国籍" else "" for i in result["data"]["avp"]]
         r = []
         for i in country:
             if i != "":
@@ -112,33 +114,85 @@ if __name__ == "__main__":
         print(key + ": " + value)
         break
     
-    '''
     # 根据news_id检索数据库中的观点
     news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
     vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
-    vps_df = pd.DataFrame(vps_list)
+    views_df = pd.DataFrame(vps_list)
 
-    # views_df = views_df.dropna(subset=["person_name"])
-    
-    
-    # views中per为空的处理
+    # 加载中文国家名称转换信息
+    with codecs.open("dict/zhcountry_convert.json",'r','utf-8') as jf:
+        zhcountry_convert_dict = json.load(jf)
 
-    for per in tqdm(views_df['person_name']):
-        if per not in per_country_dict:
-            result = requests.get(baseurl + "entity=" + per + "&attribute=国籍")
-            countrys = json.loads(result.text)
-            if len(countrys) == 0:
-                per_country_dict[per] = 'N'
-            else:
-                per_country_dict[per] = countrys[0]
-    
+    # 加载echarts世界地图国家中文名
+    pkl_rf = open('dict/echarts_zhcountry_set.pkl','rb')
+    zhcountry_set = pickle.load(pkl_rf)
 
+    #加载之前存储的{专家：国家}字典
+    pkl_rf = open('dict/per_country.pkl','rb')
+    per_country_dict = pickle.load(pkl_rf)
 
-    # 保存{人名:国家} 字典
-    pkl_wf = open("dict/per_country.pkl","w") 
-    pickle.dump(per_country_dict, pkl_wf) 
+    org2per_count = 0
+    view_country_list = []
+    for i in range(0, len(views_df)):
+        row = views_df.iloc[i]
+        per = row['person_name']
+        org = str(row['org_name']) + str(row['pos'])
+        # print(org)
+        per_country = "N"
+        
+        # 如果该专家之前已经处理过
+        if per in per_country_dict:
+            if per_country_dict[per] is not "N":    # 该专家的国家名称不为N 
+                # views_df.iloc[i]['country'] = per_country_dict[per] # 获取专家所在的国家
+                view_country_list.append(per_country_dict[per])
+                continue # 该专家已经存在库中则进行跳过
 
+        # 先判断org中是否包含set中的国家
+        for con in zhcountry_set:
+            if con in org:
+                per_country = con
+                break
+        
+        # 如果在org中找到了符合要求的则进行存储并continue
+        if per_country is not "N":
+            if isinstance(per, str):
+                org2per_count += 1 
+                per_country_dict[per] = per_country # 根据org字段补全专家国籍
+            # row['country'] = per_country
+            view_country_list.append(per_country)
+            continue
 
-    # 根据专家名字增加国家字段
-    vps_df.to_csv("data/" + theme_name + "_views.csv", index=False) # 将观点数据存入文件中
-    '''
+        # 根据per来查找知识图谱中的信息
+        if isinstance(per, str): # 如果per字段不为空
+            country = findCountry(per)
+            # 在进行国家对比的时候先进行转换
+            if country in zhcountry_convert_dict:
+                country = zhcountry_convert_dict[country]
+            # 如果该国家在echarts中的中文国家字典中
+            if country in zhcountry_set:
+                per_country = country
+            per_country_dict[per] = per_country
+
+        # row['country'] = per_country
+        view_country_list.append(per_country)
+
+    print("补全专家人数:" + str(org2per_count))
+    views_df['country'] = view_country_list # 新增一列国家
+
+    # 统计该专题下的{国家-观点数量分布}
+    country_view_dict = {}
+    for country in views_df["country"]:
+        if country in country_view_dict:
+            country_view_dict[country] += 1
+        else:
+            country_view_dict[country] = 1
+
+    # 存储不同专题的国家-观点数量信息
+    pklf = open("dict/" + theme_name+ "_countryviews_dict.pkl","wb") 
+    pickle.dump(country_view_dict, pklf)
+
+    # 保存{人名:国家}字典
+    pklf = open("dict/per_country.pkl","wb") 
+    pickle.dump(per_country_dict, pklf) 
+
+    views_df.to_csv("data/" + theme_name + "_views.csv", index=False) # 将增加国家数据的观点数据存入文件中

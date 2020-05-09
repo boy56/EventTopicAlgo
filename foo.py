@@ -91,6 +91,7 @@ with codecs.open("result/news_influence.json", "w", "utf-8") as wf:
     json.dump(result, wf, indent=4)
 '''
 
+'''
 # 根据bd56部署的知识图谱查询 专家人名信息/机构信息, 对观点数据进行补全
 import requests
 # result = requests.get("http://10.1.1.56:9000/eav?entity=李华敏&attribute=国籍")
@@ -114,31 +115,93 @@ def findCountry(entity):
             return r[0]
         else:
             return "N"
-        
+
 
 views_df = pd.read_csv("data/南海自由航行_views.csv")
-per_country_dict = {}
-total_count = 0
-non_count = 0 # 没有检索出来的人名
-for per in tqdm(views_df['person_name']):
-    # print(per)
-    if not isinstance(per, str): continue # 不是字符串类型则跳过, 即处理专家名为空的情况
-    if per not in per_country_dict:
-        # print(per)
-        total_count += 1
+
+with codecs.open("dict/zhcountry_convert.json",'r','utf-8') as jf:
+    zhcountry_convert_dict = json.load(jf)
+
+# 加载echarts世界地图国家中文名
+pkl_rf = open('dict/echarts_zhcountry_set.pkl','rb')
+zhcountry_set = pickle.load(pkl_rf)
+
+#加载之前存储的{专家：国家}字典
+pkl_rf = open('dict/per_country.pkl','rb')
+per_country_dict = pickle.load(pkl_rf)
+
+org2per_count = 0
+view_country_list = []
+for i in range(0, len(views_df)):
+    row = views_df.iloc[i]
+    per = row['person_name']
+    org = str(row['org_name']) + str(row['pos'])
+    # print(org)
+    per_country = "N"
+    
+    # 如果该专家之前已经处理过
+    if per in per_country_dict:
+        if per_country_dict[per] is not "N":    # 该专家的国家名称不为N 
+            # views_df.iloc[i]['country'] = per_country_dict[per] # 获取专家所在的国家
+            view_country_list.append(per_country_dict[per])
+            continue # 该专家已经存在库中则进行跳过
+
+    # 先判断org中是否包含set中的国家
+    for con in zhcountry_set:
+        if con in org:
+            per_country = con
+            break
+    
+    # 如果在org中找到了符合要求的则进行存储并continue
+    if per_country is not "N":
+         if isinstance(per, str):
+             org2per_count += 1 
+             per_country_dict[per] = per_country # 根据org字段补全专家国籍
+         # row['country'] = per_country
+         view_country_list.append(per_country)
+         continue
+
+    # 根据per来查找知识图谱中的信息
+    if isinstance(per, str): # 如果per字段不为空
         country = findCountry(per)
-        if country == 'N': non_count += 1
-        per_country_dict[per] = country
-        
-print(total_count)
-print(non_count)
+        # 在进行国家对比的时候先进行转换
+        if country in zhcountry_convert_dict:
+            country = zhcountry_convert_dict[country]
+        # 如果该国家在echarts中的中文国家字典中
+        if country in zhcountry_set:
+            per_country = country
+        per_country_dict[per] = per_country
+
+    # row['country'] = per_country
+    view_country_list.append(per_country)
+
+print("补全专家人数:" + str(org2per_count))
+views_df['country'] = view_country_list # 新增一列国家
 
 
 # 保存{人名:国家}字典
 pklf = open("dict/per_country.pkl","wb") 
 pickle.dump(per_country_dict, pklf) 
 
+
 with codecs.open("result/per_country.txt","w","utf-8") as wf:
     for key, value in per_country_dict.items():
         wf.write(key + ": " + value + "\n")
 
+views_df.to_csv("data/南海自由航行_new_views.csv", index=False) # 将增加国家数据的观点数据存入文件中
+'''
+
+theme_name = "南海"
+views_df = pd.read_csv("data/南海自由航行_new_views.csv")
+# 统计该专题下的{国家-观点数量分布}
+
+country_view_dict = {}
+for country in views_df["country"]:
+    if country in country_view_dict:
+        country_view_dict[country] += 1
+    else:
+        country_view_dict[country] = 1
+
+# 存储不同专题的国家-观点数量信息
+pklf = open("dict/" + theme_name+ "_countryviews_dict.pkl","wb") 
+pickle.dump(country_view_dict, pklf)
