@@ -190,7 +190,7 @@ with codecs.open("result/per_country.txt","w","utf-8") as wf:
 
 views_df.to_csv("data/南海自由航行_new_views.csv", index=False) # 将增加国家数据的观点数据存入文件中
 '''
-
+'''
 theme_name = "南海"
 views_df = pd.read_csv("data/南海自由航行_views.csv")
 # 统计该专题下的{国家-观点数量分布}
@@ -206,3 +206,6 @@ for country in views_df["country"]:
 # 存储不同专题的国家-观点数量信息
 pklf = open("dict/" + theme_name+ "_countryviews_dict.pkl","wb") 
 pickle.dump(country_view_dict, pklf)
+'''
+
+print(float("%.2f" % (3/4)))

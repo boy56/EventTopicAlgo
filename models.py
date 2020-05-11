@@ -25,10 +25,11 @@ class NewsInfo(Model):
     content = TextField(default="")#无数据时默认为空字符串
     url = CharField()
     customer = CharField()  # 新闻的媒体分布
-    emotion = IntegerField()    # 新闻情绪
+    # emotion = FloatField() # 情绪
     # entities = CharField()  # 涉及实体
     # keyword = CharField() # 关键词
     location = CharField() # 地点
+
     # pageview = IntegerField() # 页面点击量
     # userview = IntegerField() # 用户访问量
     # searchword = CharField()
@@ -38,7 +39,10 @@ class NewsInfo(Model):
     theme_label = CharField()
     content_label = CharField()
     country_label = CharField()
-
+    
+    positive = FloatField() # 正面情绪
+    negative = FloatField() # 负面情绪
+    influence = FloatField() # 影响力指数
 
     class Meta:
         database = mysql_db

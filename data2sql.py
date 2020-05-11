@@ -25,7 +25,7 @@ def newscsvtosql(path, theme, datatype=1):
         tmp['content'] = clean_zh_text(row['content'])  # 清洗正文内容
         tmp['url'] = row['url']
         tmp['customer'] = row['customer']
-        tmp['emotion'] = row['emotion']
+        # tmp['emotion'] = row['emotion']
         # tmp['entities'] = row['entities']
         # tmp['keyword'] = row['keyword']
         tmp['location'] = row['location']
@@ -36,6 +36,9 @@ def newscsvtosql(path, theme, datatype=1):
         tmp['theme_label'] = theme
         tmp['content_label'] = row['content_label']
         tmp['country_label'] = row['country_label']
+        tmp['positive'] = row['positive']
+        tmp['negative'] = row['negative']
+        tmp['influence'] = row['influence']
 
         news_data.append(tmp)
 
@@ -113,7 +116,7 @@ def viewscsvtosql(path, datatype=1):
 # 数据库建库建表
 if __name__ == "__main__":
     theme_name = "南海"
-    newscsvtosql("data/南海自由航行_news_newlabel.csv",'南海')
-    viewscsvtosql('data/南海自由航行_views.csv')
+    newscsvtosql("data/" + theme_name + "_news_newdata.csv",'南海')
+    viewscsvtosql("data/" + theme_name + "_views_newdata.csv")
 
    
