@@ -20,7 +20,7 @@ def newscsvtosql(path, theme, datatype=1):
     for index, row in df.iterrows():
         tmp = {}
         tmp['newsid'] = row['news_id']
-        tmp['title'] = row['title']
+        tmp['title'] = clean_zh_text(row['title'], 2)
         tmp['time'] = datetime.strftime(row['time'],'%Y-%m-%d %H:%M:%S')    # 格式化时间字符串
         tmp['content'] = clean_zh_text(row['content'])  # 清洗正文内容
         tmp['url'] = row['url']
@@ -49,8 +49,8 @@ def newscsvtosql(path, theme, datatype=1):
     # 插入新闻数据
     if not NewsInfo.table_exists(): # 如果表不存在则创建
         NewsInfo.create_table()
-    else: # bug调好后注释掉, 改为增量
-        NewsInfo.delete().execute() # 每次重新更新之前清空数据表
+    # else: # bug调好后注释掉, 改为增量
+    #    NewsInfo.delete().execute() # 每次重新更新之前清空数据表
     
     # 根据切片分批次插入
     slice_size = 300    # 切片大小
@@ -96,8 +96,8 @@ def viewscsvtosql(path, datatype=1):
     # 插入新闻数据
     if not ViewsInfo.table_exists(): # 如果表不存在则创建
         ViewsInfo.create_table()
-    else: # bug调好后注释掉, 改为增量
-        ViewsInfo.delete().execute() # 每次重新更新之前清空数据表
+    # else: # bug调好后注释掉, 改为增量
+    #     ViewsInfo.delete().execute() # 每次重新更新之前清空数据表
     
     # 根据切片分批次插入
     slice_size = 300    # 切片大小
