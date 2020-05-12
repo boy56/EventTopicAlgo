@@ -78,7 +78,10 @@ def viewscsvtosql(path, datatype=1):
     for index, row in df.iterrows():
         tmp = {}
         tmp['personname'] = row['person_name']
-        tmp['country'] = row['country']
+        if row['country'] == 'N': 
+            tmp['country'] = ""
+        else: 
+            tmp['country'] = row['country']
         tmp['orgname'] = row['org_name']
         tmp['pos'] = row['pos']
         tmp['verb'] = row['verb']
