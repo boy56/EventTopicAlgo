@@ -249,10 +249,10 @@ if __name__ == "__main__":
     news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
     vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
     views_df = pd.DataFrame(vps_list)
-    # views_df = pd.read_csv("data/南海_views.csv")
+    # views_df = pd.read_csv("data/朝核_views_newdata.csv")
     
     # 对新闻数据新增标签
-    # news_deal(theme_name, news_df, views_df)
+    news_deal(theme_name, news_df, views_df)
 
     # 对观点数据新增国家标签
     views_deal(theme_name, views_df)
