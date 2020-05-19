@@ -207,5 +207,9 @@ for country in views_df["country"]:
 pklf = open("dict/" + theme_name+ "_countryviews_dict.pkl","wb") 
 pickle.dump(country_view_dict, pklf)
 '''
-
-print(float("%.2f" % (3/4)))
+# 加载echarts世界地图国家中文名
+pkl_rf = open('dict/echarts_zhcountry_set.pkl','rb')
+zhcountry_set = pickle.load(pkl_rf)
+zhcountry_set.add("科特迪瓦") # 增加科特迪瓦国家信息
+pklf = open("dict/echarts_zhcountry_set.pkl","wb") 
+pickle.dump(zhcountry_set, pklf)
