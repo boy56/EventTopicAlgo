@@ -110,10 +110,20 @@ def news_deal(theme_name, news_df, views_df):
     classifyFunc = ClassifyFunc(theme=theme_name)
     title_country_dict = {} # title/country 字典
     title_content_dict = {} # title/content 字典
-    # 根据新闻信息和对应的观点信息计算新闻的正负向情感数值以及影响力指数
+    
+    # 根据新闻信息和对应的观点信息计算新闻的正负向情感数值以及影响力指数、可靠性指数以及危机指数等信息
     newsid_pos_segment = {}
     newsid_neg_segment = {}
-    newsid_influence = {}
+    newsid_influence = {}   # 新闻-影响力对应关系
+
+    newsid_reliability = {} # 新闻-可靠性指数对应的关系
+    newsid_crisis = {} # 新闻-危机指数对应关系
+
+    pageview_max = news_df.loc[:, "pageview"].max() # 计算当前数据中最大的pageview, 并对每个pageview进行归一到[0, 100]
+
+    # 加载媒体评分字典
+    with codecs.open("dict/media_score.json",'r','utf-8') as jf:
+        media_score_dict = json.load(jf)
 
     for i in range(0, len(news_df)):
         pos_num = 0 # 专家观点情绪为正的数量
@@ -143,14 +153,29 @@ def news_deal(theme_name, news_df, views_df):
             newsid_pos_segment[n_id] = float("%.2f" % (pos_num/(pos_num + neg_num)))
             newsid_neg_segment[n_id] = float("%.2f" % (neg_num/(pos_num + neg_num)))
         newsid_influence[n_id] = influence
-    
+
+        # 计算新闻的可靠性指数, 媒体评级 * 0.9 + pageview * 0.1
+        if row['customer'] in media_score_dict:
+            newsid_reliability[n_id] = media_score_dict[row['customer']]*10*0.9 + float("%.2f" % (float(row['pageview'])/pageview_max*100*0.1)) # 当前媒体有评级评分
+        else:
+            newsid_reliability[n_id] = float("%.2f" % (float(row['pageview'])/pageview_max*100*0.3)) # 当前媒体没有评级评分, 将pageview评分提高到0-30之间
+
+        # 计算新闻的危机指数
+
+
     # 将国家标签、内容标签添加到数据中
     news_df['country_label']=news_df['title'].map(title_country_dict)
     news_df['content_label']=news_df['title'].map(title_content_dict)
+    
     # 将正负向情感指数、影响力指数、国家标签、内容标签添加到数据中
     news_df['positive'] = news_df['news_id'].map(newsid_pos_segment)
     news_df['negative'] = news_df['news_id'].map(newsid_neg_segment)
     news_df['influence'] = news_df['news_id'].map(newsid_influence)
+
+    # 将新闻可靠性指数、新闻危机指数加到数据中
+    news_df['reliability'] = news_df['news_id'].map(newsid_reliability)
+    
+
 
     news_df.to_csv("data/" + theme_name + "_news_newdata.csv",index=False)
 
@@ -247,12 +272,12 @@ if __name__ == "__main__":
 
     # 根据news_id检索数据库中的观点
     news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
-    vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
-    views_df = pd.DataFrame(vps_list)
-    # views_df = pd.read_csv("data/朝核_views_newdata.csv")
+    # vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
+    # views_df = pd.DataFrame(vps_list)
+    views_df = pd.read_csv("data/" + theme_name + "_views_newdata.csv")
     
     # 对新闻数据新增标签
     news_deal(theme_name, news_df, views_df)
 
     # 对观点数据新增国家标签
-    views_deal(theme_name, views_df)
+    # views_deal(theme_name, views_df)
