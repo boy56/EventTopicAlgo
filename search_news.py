@@ -37,7 +37,7 @@ def get_hbase_row(doc_id, time_str):
     return info
 
 # 根据关键词构造查询体并以半年为时间段进行检索, 并将结果写入csv文件
-def batch_search(query_list, time_start, time_end, outcsv):
+def batch_search(query_list, time_start, time_end, outcsv, csvhead):
 
     # 将时间限制放入查询体
     query_list.append({"range":{"time":{"gt":time_start,"lt":time_end}}})
@@ -76,12 +76,12 @@ def batch_search(query_list, time_start, time_end, outcsv):
             continue
         row = []
         row.append(data[i]['_id'])
-        for item in name[1:]:
+        for item in csvhead[1:]:
             if item in result:
                 row.append(result[item])
             else:
                 row.append("")
-        writer.writerow(row)
+        outcsv.writerow(row)
 
     query_list = query_list.pop() # 移除请求列表最后一个条件, 即当前查询的时间限制, 以防时间叠加问题
 
@@ -103,11 +103,11 @@ def get_news_data(fout, fkeywords):
             )
     
     # 以半年期进行分批次查询数据
-    batch_search(query_list, '2018-01-01', '2018-06-01', writer)
-    batch_search(query_list, '2018-06-02', '2018-12-31', writer)
-    batch_search(query_list, '2019-01-01', '2019-06-01', writer)
-    batch_search(query_list, '2019-06-02', '2019-12-31', writer)
-    batch_search(query_list, '2020-01-01', '2020-07-01', writer) # 后续扩增数据可以注释掉这些代码, 然后在后面重新查询
+    batch_search(query_list, '2018-01-01', '2018-06-01', writer, name)
+    batch_search(query_list, '2018-06-02', '2018-12-31', writer, name)
+    batch_search(query_list, '2019-01-01', '2019-06-01', writer, name)
+    batch_search(query_list, '2019-06-02', '2019-12-31', writer, name)
+    batch_search(query_list, '2020-01-01', '2020-07-01', writer, name) # 后续扩增数据可以注释掉这些代码, 然后在后面重新查询
 
     csvFile.close()
 
