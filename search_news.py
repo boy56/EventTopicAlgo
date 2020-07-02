@@ -113,4 +113,4 @@ def get_news_data(fout, fkeywords):
 
 # 主函数
 if __name__ == "__main__":    
-    get_news_data('data/南海_202007_news.csv', 'dict/南海新闻关键词.txt')
+    get_news_data('data/台选_202007_news.csv', 'dict/台选新闻关键词.txt')
