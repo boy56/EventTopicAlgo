@@ -59,14 +59,26 @@ def get_news_data(fout, fkeywords):
             {
                 "bool":
                 {
-                    "must": query_list,
+                    "must": [
+                        {"term":{"content": "南海"}},
+                        {"term":{"content": "航行"}},
+                        {"range":
+                            {
+                                "time":{
+                                    "gt":"2018-01-01",
+                                    "lt":"2020-07-01"
+                                }
+                            }
+                        },
+
+                    ],
 
                     "must_not":[],
                     "should":[]
                 }
             },
             "from":0,
-            "size":5000,
+            "size":10000,
             "sort":[],
             "aggs":{}
         }
@@ -98,4 +110,4 @@ def get_news_data(fout, fkeywords):
 
 # 主函数
 if __name__ == "__main__":    
-    get_news_data('data/朝核相关新闻列表.csv', 'dict/朝核新闻关键词.txt')
+    get_news_data('data/南海_202007_news.csv', 'dict/南海新闻关键词.txt')
