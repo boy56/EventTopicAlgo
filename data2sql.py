@@ -119,7 +119,8 @@ def viewscsvtosql(path, datatype=1):
 # 数据库建库建表
 if __name__ == "__main__":
     theme_name = "朝核"
-    newscsvtosql("data/" + theme_name + "_news_newdata.csv",theme_name)
-    viewscsvtosql("data/" + theme_name + "_views_newdata.csv")
+    date_str = '202007'
+    newscsvtosql("data/" + theme_name + "_" + date_str + "_news_newdata.csv",theme_name)
+    viewscsvtosql("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
 
    

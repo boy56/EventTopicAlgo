@@ -17,6 +17,7 @@ import pandas as pd
 import datetime
 from tqdm import tqdm
 from ClassifyFunc import ClassifyFunc
+from CrisisNewsFunc import CrisisNewsFunc
 import codecs
 
 ES_IP = '10.1.1.36'
@@ -105,9 +106,10 @@ def findCountry(entity):
             return "N"
 
 # 根据新闻信息和对应的观点信息计算新闻的正负向情感数值以及影响力指数
-def news_deal(theme_name, news_df, views_df):
-    # 根据dict获取关键词字典并进行国家、事件分类
-    classifyFunc = ClassifyFunc(theme=theme_name)
+def news_deal(theme_name, news_df, views_df, date_str):
+    classifyFunc = ClassifyFunc(theme=theme_name) # 根据dict获取关键词字典并进行国家、事件分类
+    crisisNewsFunc = CrisisNewsFunc()
+    
     title_country_dict = {} # title/country 字典
     title_content_dict = {} # title/content 字典
     
@@ -117,8 +119,14 @@ def news_deal(theme_name, news_df, views_df):
     newsid_influence = {}   # 新闻-影响力对应关系
 
     newsid_reliability = {} # 新闻-可靠性指数对应的关系
+    crisis_max = 0
     newsid_crisis = {} # 新闻-危机指数对应关系
+    newsid_wjwords = {} # 新闻-危机词对应关系
+    newsid_persons = {} # 新闻-专家对应关系
+    newsid_orgs = {} # 新闻-机构对应关系
 
+
+    # 获取最大浏览量，用于pageview的归一化
     pageview_max = news_df.loc[:, "pageview"].max() # 计算当前数据中最大的pageview, 并对每个pageview进行归一到[0, 100]
 
     # 加载媒体评分字典
@@ -133,6 +141,8 @@ def news_deal(theme_name, news_df, views_df):
         row = news_df.iloc[i]
         n_id = row['news_id']
         title = row['title']
+        content = row['content']
+
         title_country_dict[title] = classifyFunc.classify_title(title, dict_type=1) # 计算新闻国家标签
         title_content_dict[title] = classifyFunc.classify_title(title, dict_type=0) # 计算新闻内容标签
 
@@ -145,6 +155,12 @@ def news_deal(theme_name, news_df, views_df):
                 neg_num += 1
             influence += 1 # 有一个专家观点则增加1的新闻的影响力指数, 后续可以根据专家的权重来更改
         
+        # 获取观点数据中的专家列表
+        newsid_persons[n_id] = list(set(new_views['person_name'].tolist()))
+
+        # 获取观点数据中的机构列表
+        newsid_orgs[n_id] = list(set(new_views['org_name'].tolist()))
+
         # 对新闻的正负向指数进行归一化
         if pos_num + neg_num == 0:
             newsid_pos_segment[n_id] = 0
@@ -161,6 +177,13 @@ def news_deal(theme_name, news_df, views_df):
             newsid_reliability[n_id] = float("%.2f" % (float(row['pageview'])/pageview_max*100*0.3)) # 当前媒体没有评级评分, 将pageview评分提高到0-30之间
 
         # 计算新闻的危机指数
+        WJcrisis, WJWords = crisisNewsFunc.calcu_crisis(theme_name, title, content)
+
+        # 更新crisis最大值
+        if WJcrisis > crisis_max:
+            crisis_max = WJcrisis
+        newsid_crisis[n_id] = WJcrisis
+        newsid_wjwords[n_id] = WJWords
 
 
     # 将国家标签、内容标签添加到数据中
@@ -175,12 +198,20 @@ def news_deal(theme_name, news_df, views_df):
     # 将新闻可靠性指数、新闻危机指数加到数据中
     news_df['reliability'] = news_df['news_id'].map(newsid_reliability)
     
+    # 将危机指数归一化到0-100
+    for n_id, value in newsid_crisis.items():
+        newsid_crisis[n_id] = float("%.2f" % (value/crisis_max * 100))
+    news_df['crisis'] = news_df['news_id'].map(newsid_crisis)
+    
+    # 将新闻涉及的专家名字, 机构名字, 危机词加入到数据中
+    news_df['persons'] = news_df['news_id'].map(newsid_persons)
+    news_df['orgs'] = news_df['news_id'].map(newsid_orgs)
+    news_df['wjwords'] = news_df['news_id'].map(newsid_wjwords)
 
-
-    news_df.to_csv("data/" + theme_name + "_news_newdata.csv",index=False)
+    news_df.to_csv("data/" + theme_name + "_" + date_str + "_news_newdata.csv",index=False)
 
 # 根据专家、机构获取观点对应的国籍
-def views_deal(theme_name, views_df):
+def views_deal(theme_name, views_df, date_str):
     # 加载之前已经存在的字典
     pkl_rf = open('dict/per_country.pkl','rb')
     per_country_dict = pickle.load(pkl_rf)
@@ -262,22 +293,23 @@ def views_deal(theme_name, views_df):
     pklf = open("dict/per_country.pkl","wb") 
     pickle.dump(per_country_dict, pklf) 
 
-    views_df.to_csv("data/" + theme_name + "_views_newdata.csv", index=False) # 将增加国家数据的观点数据存入文件中
+    views_df.to_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv", index=False) # 将增加国家数据的观点数据存入文件中
 
 
 if __name__ == "__main__":
-    theme_name = "朝核"
-    news_df = pd.read_csv("data/" + theme_name + "_news.csv")
+    theme_name = "南海"
+    date_str = '202007'
+    news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
     news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
 
     # 根据news_id检索数据库中的观点
     news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
-    # vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
-    # views_df = pd.DataFrame(vps_list)
-    views_df = pd.read_csv("data/" + theme_name + "_views_newdata.csv")
+    vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
+    views_df = pd.DataFrame(vps_list)
+    # views_df = pd.read_csv("data/" + theme_name + "_views_newdata.csv")
     
     # 对新闻数据新增标签
-    news_deal(theme_name, news_df, views_df)
+    news_deal(theme_name, news_df, views_df, date_str)
 
     # 对观点数据新增国家标签
-    # views_deal(theme_name, views_df)
+    views_deal(theme_name, views_df, date_str)
