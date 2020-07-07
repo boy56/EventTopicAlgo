@@ -54,7 +54,7 @@ def find_viewpoints_by_news_id(news_ids=None,size=3000):
     nslices = math.floor(len(news_ids) / slice_size)
     
     # 分批次查询
-    for i in range(0, nslices):
+    for i in tqdm(range(0, nslices)):
         tmp_id = news_ids[i*slice_size:(i+1)*slice_size]    # 切片查询   
         q = query_vp_by_news(tmp_id)
         vps = ViewPoint.search().using(es_client).query(q).extra(size=size).execute()   # 输出为elasticsearch_dsl.response.Response对象
@@ -133,7 +133,7 @@ def news_deal(theme_name, news_df, views_df, date_str):
     with codecs.open("dict/media_score.json",'r','utf-8') as jf:
         media_score_dict = json.load(jf)
 
-    for i in range(0, len(news_df)):
+    for i in tqdm(range(0, len(news_df))):
         pos_num = 0 # 专家观点情绪为正的数量
         neg_num = 0 # 专家观点情绪为负的数量
         influence = 0 # 每多一条专家观点, 新闻的影响力就+1
@@ -231,7 +231,7 @@ def views_deal(theme_name, views_df, date_str):
     # 为每条观点获取国家属性
     org2per_count = 0
     view_country_list = []
-    for i in range(0, len(views_df)):
+    for i in tqdm(range(0, len(views_df))):
         row = views_df.iloc[i]
         per = row['person_name']
         org = str(row['org_name']) + str(row['pos'])
