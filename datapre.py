@@ -13,6 +13,7 @@ from elasticsearch import Elasticsearch
 import math
 import pickle
 import pandas as pd
+import numpy as np
 
 import datetime
 from tqdm import tqdm
@@ -147,6 +148,8 @@ def news_deal(theme_name, news_df, views_df, date_str):
         title_content_dict[title] = classifyFunc.classify_title(title, dict_type=0) # 计算新闻内容标签
 
         new_views = views_df[views_df['news_id'] == n_id]
+        # print(new_views['person_name'].tolist())
+        
         for v_s in new_views['sentiment']:
             # 判断专家观点的情绪
             if v_s > 0.6:
@@ -156,10 +159,10 @@ def news_deal(theme_name, news_df, views_df, date_str):
             influence += 1 # 有一个专家观点则增加1的新闻的影响力指数, 后续可以根据专家的权重来更改
         
         # 获取观点数据中的专家列表
-        newsid_persons[n_id] = list(set(new_views['person_name'].tolist()))
+        newsid_persons[n_id] = " ".join(list(set(new_views['person_name'].dropna().tolist())))
 
         # 获取观点数据中的机构列表
-        newsid_orgs[n_id] = list(set(new_views['org_name'].tolist()))
+        newsid_orgs[n_id] = " ".join(list(set(new_views['org_name'].dropna().tolist())))
 
         # 对新闻的正负向指数进行归一化
         if pos_num + neg_num == 0:
@@ -304,12 +307,12 @@ if __name__ == "__main__":
 
     # 根据news_id检索数据库中的观点
     news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
-    vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
-    views_df = pd.DataFrame(vps_list)
-    # views_df = pd.read_csv("data/" + theme_name + "_views_newdata.csv")
+    # vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
+    # views_df = pd.DataFrame(vps_list)
+    views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
     
     # 对新闻数据新增标签
     news_deal(theme_name, news_df, views_df, date_str)
 
     # 对观点数据新增国家标签
-    views_deal(theme_name, views_df, date_str)
+    # views_deal(theme_name, views_df, date_str)
