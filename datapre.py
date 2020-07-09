@@ -110,7 +110,7 @@ def findCountry(entity):
 def news_deal(theme_name, news_df, views_df, date_str):
     classifyFunc = ClassifyFunc(theme=theme_name) # 根据dict获取关键词字典并进行国家、事件分类
     crisisNewsFunc = CrisisNewsFunc()
-    
+    # print(views_df.shape)
     title_country_dict = {} # title/country 字典
     title_content_dict = {} # title/content 字典
     
@@ -133,7 +133,7 @@ def news_deal(theme_name, news_df, views_df, date_str):
     # 加载媒体评分字典
     with codecs.open("dict/media_score.json",'r','utf-8') as jf:
         media_score_dict = json.load(jf)
-
+    
     for i in tqdm(range(0, len(news_df))):
         pos_num = 0 # 专家观点情绪为正的数量
         neg_num = 0 # 专家观点情绪为负的数量
@@ -146,9 +146,9 @@ def news_deal(theme_name, news_df, views_df, date_str):
 
         title_country_dict[title] = classifyFunc.classify_title(title, dict_type=1) # 计算新闻国家标签
         title_content_dict[title] = classifyFunc.classify_title(title, dict_type=0) # 计算新闻内容标签
-
-        new_views = views_df[views_df['news_id'] == n_id]
-        # print(new_views['person_name'].tolist())
+        # print(type(n_id), n_id)
+        new_views = views_df[views_df['news_id'] == str(n_id)]
+        # print(new_views.shape)
         
         for v_s in new_views['sentiment']:
             # 判断专家观点的情绪
@@ -212,7 +212,7 @@ def news_deal(theme_name, news_df, views_df, date_str):
     news_df['wjwords'] = news_df['news_id'].map(newsid_wjwords)
 
     news_df.to_csv("data/" + theme_name + "_" + date_str + "_news_newdata.csv",index=False)
-
+    
 # 根据专家、机构获取观点对应的国籍
 def views_deal(theme_name, views_df, date_str):
     # 加载之前已经存在的字典
@@ -300,19 +300,19 @@ def views_deal(theme_name, views_df, date_str):
 
 
 if __name__ == "__main__":
-    theme_name = "南海"
+    theme_name = "台选"
     date_str = '202007'
     news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
     news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
 
     # 根据news_id检索数据库中的观点
     news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
-    # vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
-    # views_df = pd.DataFrame(vps_list)
-    views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
-    
+    vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
+    views_df = pd.DataFrame(vps_list)
+    # views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
+    # print(views_df[views_df['news_id'] == "7099134353031486388"])
     # 对新闻数据新增标签
     news_deal(theme_name, news_df, views_df, date_str)
 
     # 对观点数据新增国家标签
-    # views_deal(theme_name, views_df, date_str)
+    views_deal(theme_name, views_df, date_str)
