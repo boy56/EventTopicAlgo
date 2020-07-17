@@ -7,7 +7,8 @@ from LTPFunc import LTPFunction
 import utils
 from tqdm import tqdm
 import pickle
-
+import os
+import random
 '''
 # 将json数据转换为csv格式, 并根据文章内容进行去重
 dataList = []   # 数据列表
@@ -206,10 +207,33 @@ for country in views_df["country"]:
 # 存储不同专题的国家-观点数量信息
 pklf = open("dict/" + theme_name+ "_countryviews_dict.pkl","wb") 
 pickle.dump(country_view_dict, pklf)
-'''
+
 # 加载echarts世界地图国家中文名
 pkl_rf = open('dict/echarts_zhcountry_set.pkl','rb')
 zhcountry_set = pickle.load(pkl_rf)
 zhcountry_set.add("科特迪瓦") # 增加科特迪瓦国家信息
 pklf = open("dict/echarts_zhcountry_set.pkl","wb") 
 pickle.dump(zhcountry_set, pklf)
+'''
+
+from googletrans import Translator
+translator = Translator(service_urls=[
+      'translate.google.cn',]) # 如果可以上外网，还可添加 'translate.google.com' 等
+
+with codecs.open("dict/WJWords.json",'r','utf-8') as rf:
+    wj_words_dict = json.load(rf)
+
+# 制作各个语言的危机字典
+result_dict = {}
+for key in wj_words_dict.keys():
+    tmp_list = []
+    for word in wj_words_dict[key]:
+        trans = translator.translate(word, src='zh-cn', dest='ko')
+        tmp_list.append(trans.text.lower())
+    result_dict[key] = tmp_list
+
+with codecs.open('dict/WJWords_ko.json','w','utf-8') as wf:
+    json.dump(result_dict, wf, indent=4, ensure_ascii=False)
+
+
+

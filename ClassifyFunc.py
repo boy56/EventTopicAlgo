@@ -1,3 +1,10 @@
+# -*- coding: UTF-8 -*-
+'''
+分类函数
+1、国家分类(根据title判断)
+2、内容分类(根据title判断)
+'''
+
 import codecs
 from typing import Iterator, List, Dict
 

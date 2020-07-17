@@ -28,7 +28,7 @@ class NewsInfo(Model):
     # emotion = FloatField() # 情绪
     # entities = CharField()  # 涉及实体
     # keyword = CharField() # 关键词
-    location = CharField() # 地点
+    # location = CharField() # 地点
 
     # pageview = IntegerField() # 页面点击量
     # userview = IntegerField() # 用户访问量
@@ -43,6 +43,12 @@ class NewsInfo(Model):
     positive = FloatField() # 正面情绪
     negative = FloatField() # 负面情绪
     influence = FloatField() # 影响力指数
+    reliability = FloatField() # 新闻可靠性指数
+    crisis = FloatField() # 新闻危机指数
+
+    persons = TextField(default="") # 新闻涉及的人物
+    orgs = TextField(default="") # 新闻涉及到的机构
+    wjwords = TextField(default="") # 新闻涉及到的危机词及权重
 
     class Meta:
         database = mysql_db
@@ -70,3 +76,24 @@ class ViewsInfo(Model):
     class Meta:
         database = mysql_db
         # db_table = "viewsInfo"
+
+class OtherNewsInfo(Model):
+    # 设置自增的id主键
+    newsid = AutoField()
+    
+    title = CharField()
+    time = DateTimeField()
+    content = TextField(default="")#无数据时默认为空字符串
+    url = CharField()
+    imgurl = CharField()
+    customer = CharField()  # 新闻的媒体来源
+
+    # 处理得到字段
+    theme_label = CharField()
+    language = CharField()
+    reliability = FloatField() # 新闻可靠性指数
+    crisis = FloatField() # 新闻危机指数
+
+    class Meta:
+        database = mysql_db
+        # db_table = "othernewsInfo"
