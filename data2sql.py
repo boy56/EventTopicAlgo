@@ -235,7 +235,7 @@ if __name__ == "__main__":
             theme_name = '朝核'
         elif args.theme == 'TX':
             theme_name = '台选'
-            
+        print(theme_name)
         date_str = args.date
         newscsvtosql("data/" + theme_name + "_" + date_str + "_news_newdata.csv",theme_name)
         viewscsvtosql("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
