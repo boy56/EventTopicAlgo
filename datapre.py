@@ -150,7 +150,7 @@ def news_deal(theme_name, news_df, views_df, date_str):
         title_country_dict[title] = classifyFunc.classify_title(title, dict_type=1) # 计算新闻国家标签
         title_content_dict[title] = classifyFunc.classify_title(title, dict_type=0) # 计算新闻内容标签
         # print(type(n_id), n_id)
-        new_views = views_df[views_df['news_id'] == str(n_id)]
+        new_views = views_df[views_df['news_id'] == n_id]
         # print(new_views.shape)
         
         for v_s in new_views['sentiment']:
@@ -205,8 +205,8 @@ def news_deal(theme_name, news_df, views_df, date_str):
     news_df['reliability'] = news_df['news_id'].map(newsid_reliability)
     # print(newsid_reliability)
     
-    print(crisis_max)
-    print(np.median([x for x in newsid_crisis.values() if x > 0]))
+    # print(crisis_max)
+    # print(np.median([x for x in newsid_crisis.values() if x > 0]))
     # 将危机指数归一化到0-100
     for n_id, value in newsid_crisis.items():
         if newsid_crisis[n_id] > 100:
@@ -251,7 +251,7 @@ def views_deal(theme_name, views_df, date_str):
         per_country = "N"
         
         # 如果该专家之前已经处理过
-        if per in per_country_dict:
+        if per != '' and per in per_country_dict: # person不为空
             if per_country_dict[per] is not "N":    # 该专家的国家名称不为N 
                 # views_df.iloc[i]['country'] = per_country_dict[per] # 获取专家所在的国家
                 view_country_list.append(per_country_dict[per])
@@ -309,7 +309,7 @@ def views_deal(theme_name, views_df, date_str):
 
 
 if __name__ == "__main__":
-    theme_name = "台选"
+    theme_name = "南海"
     date_str = '202007'
     news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
     news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
@@ -321,7 +321,7 @@ if __name__ == "__main__":
     views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
     # print(views_df[views_df['news_id'] == "7099134353031486388"])
     # 对新闻数据新增标签
-    news_deal(theme_name, news_df, views_df, date_str)
+    # news_deal(theme_name, news_df, views_df, date_str)
 
     # 对观点数据新增国家标签
-    # views_deal(theme_name, views_df, date_str)
+    views_deal(theme_name, views_df, date_str)

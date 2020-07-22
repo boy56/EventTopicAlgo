@@ -9,7 +9,6 @@ from models import NewsInfo, ViewsInfo, mysql_db, OtherNewsInfo
 import math
 import os
 import random
-from googletrans import Translator
 from CrisisNewsFunc import CrisisNewsFunc
 import time
 from tqdm import tqdm
