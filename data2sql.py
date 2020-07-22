@@ -223,12 +223,19 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='data2sql')
     parser.add_argument('--mode', type=str, default='zh', help='choose a mode: zh(中文), other(其他语言)')
-    parser.add_argument('--theme', default='南海', type=str, help='theme_name')
+    parser.add_argument('--theme', default='NH', type=str, help='theme_name')
     parser.add_argument('--date', default='202007', type=str, help='date_str')
     args = parser.parse_args()
 
     if args.mode == 'zh':
-        theme_name = args.theme
+        theme_name = ''
+        if args.theme == 'NH':
+            theme_name = '南海'
+        elif args.theme == 'CH':
+            theme_name = '朝核'
+        elif args.theme == 'TX':
+            theme_name = '台选'
+            
         date_str = args.date
         newscsvtosql("data/" + theme_name + "_" + date_str + "_news_newdata.csv",theme_name)
         viewscsvtosql("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
