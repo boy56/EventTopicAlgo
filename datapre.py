@@ -309,7 +309,7 @@ def views_deal(theme_name, views_df, date_str):
 
 
 if __name__ == "__main__":
-    theme_name = "南海"
+    theme_name = "台选"
     date_str = '202007'
     news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
     news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
