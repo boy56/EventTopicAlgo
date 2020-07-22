@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 # 将数据依赖models中的样式导入mysql中
+# peewee参考教程: https://segmentfault.com/a/1190000020265522
 
 import pandas as pd
 from utils import clean_zh_text
@@ -13,6 +14,7 @@ from CrisisNewsFunc import CrisisNewsFunc
 import time
 from tqdm import tqdm
 import argparse
+from peewee import chunked
 
 # 新闻csv导入mysql, 默认文件类型为从Hbase导出的数据
 def newscsvtosql(path, theme, datatype=1):
@@ -69,14 +71,19 @@ def newscsvtosql(path, theme, datatype=1):
     slice_size = 300    # 切片大小
     nslices = math.floor(len(news_data) / slice_size)
     
+    '''
     for i in range(0, nslices):
         with mysql_db.atomic():
-            NewsInfo.insert_many(news_data[i * slice_size: (i + 1) * slice_size]).execute() # 批量插入
+            NewsInfo.insert_many(news_data[i * slice_size: (i + 1) * slice_size]).on_conflict_ignore().execute() # 批量插入
         # print(i)
     # 插入最后一个切片的数据
     with mysql_db.atomic():
-        NewsInfo.insert_many(news_data[nslices*slice_size:]).execute() # 批量插入
+        NewsInfo.insert_many(news_data[nslices*slice_size:]).on_conflict_ignore().execute() # 批量插入, 主键重复则忽略该条, https://segmentfault.com/a/1190000020265522
     # print(nslices)
+    '''
+    with mysql_db.atomic():
+        for batch in chunked(news_data, 300): # 一次300条
+            NewsInfo.insert_many(batch).on_conflict_ignore().execute() # 批量插入, 主键重复则忽略该条
     mysql_db.close()
 
 # 观点csv导入mysql, 默认文件类型为经过vps查询得到的观点数据列表
@@ -114,7 +121,7 @@ def viewscsvtosql(path, datatype=1):
         ViewsInfo.create_table()
     # else: # bug调好后注释掉, 改为增量
     #     ViewsInfo.delete().execute() # 每次重新更新之前清空数据表
-    
+    '''
     # 根据切片分批次插入
     slice_size = 300    # 切片大小
     nslices = math.floor(len(news_data) / slice_size)
@@ -125,7 +132,11 @@ def viewscsvtosql(path, datatype=1):
     # 插入最后一个切片的数据
     with mysql_db.atomic():
         ViewsInfo.insert_many(news_data[nslices*slice_size:]).execute() # 批量插入
+    '''
 
+    with mysql_db.atomic():
+        for batch in chunked(news_data, 300): # 一次300条
+            ViewsInfo.insert_many(batch).on_conflict_ignore().execute() # 批量插入, 主键重复则忽略该条
     mysql_db.close()
     return 
 
@@ -191,8 +202,6 @@ def other_langage_tosql(path):
             '''
             news_data.append(tmp)
         
-
-    
     # write data to mysql
     mysql_db.connect()
     
@@ -206,6 +215,7 @@ def other_langage_tosql(path):
     slice_size = 300    # 切片大小
     nslices = math.floor(len(news_data) / slice_size)
     
+    '''
     for i in range(0, nslices):
         with mysql_db.atomic():
             OtherNewsInfo.insert_many(news_data[i * slice_size: (i + 1) * slice_size]).execute() # 批量插入
@@ -214,6 +224,13 @@ def other_langage_tosql(path):
     with mysql_db.atomic():
         OtherNewsInfo.insert_many(news_data[nslices*slice_size:]).execute() # 批量插入
     # print(nslices)
+    '''
+
+    with mysql_db.atomic():
+        for batch in chunked(news_data, 300): # 一次300条
+            OtherNewsInfo.insert_many(batch).on_conflict_ignore().execute() # 批量插入, 主键重复则忽略该条
+
+
     mysql_db.close()
     
     return
@@ -235,7 +252,7 @@ if __name__ == "__main__":
             theme_name = '朝核'
         elif args.theme == 'TX':
             theme_name = '台选'
-        print(theme_name)
+        # print(theme_name)
         date_str = args.date
         newscsvtosql("data/" + theme_name + "_" + date_str + "_news_newdata.csv",theme_name)
         viewscsvtosql("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
