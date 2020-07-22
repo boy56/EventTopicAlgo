@@ -42,12 +42,13 @@ def newscsvtosql(path, theme, datatype=1):
         tmp['theme_label'] = theme
         tmp['content_label'] = row['content_label']
         tmp['country_label'] = row['country_label']
-        tmp['positive'] = row['positive']
-        tmp['negative'] = row['negative']
-        tmp['influence'] = row['influence']
-
-        tmp['reliability'] = row['reliability']
-        tmp['crisis'] = row['crisis']
+        tmp['positive'] = float(row['positive'])
+        tmp['negative'] = float(row['negative'])
+        tmp['influence'] = float(row['influence'])
+        # print(row['reliability'])
+        tmp['reliability'] = float(row['reliability'])
+        
+        tmp['crisis'] = float(row['crisis'])
         tmp['persons'] = row['persons']
         tmp['orgs'] = row['orgs']
         tmp['wjwords'] = row['wjwords']
@@ -219,11 +220,11 @@ def other_langage_tosql(path):
 
 # 数据库建库建表
 if __name__ == "__main__":
-    '''
+    
     theme_name = "南海"
     date_str = '202007'
     newscsvtosql("data/" + theme_name + "_" + date_str + "_news_newdata.csv",theme_name)
     viewscsvtosql("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
-    '''
-    other_langage_tosql("data/other_language_data")
+    
+    # other_langage_tosql("data/other_language_data")
    

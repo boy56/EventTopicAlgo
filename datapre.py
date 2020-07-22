@@ -134,6 +134,8 @@ def news_deal(theme_name, news_df, views_df, date_str):
     with codecs.open("dict/media_score.json",'r','utf-8') as jf:
         media_score_dict = json.load(jf)
     
+    news_df['pageview'] = news_df['pageview'].fillna(0) # 填充pageview值, 在可靠性计算时若该值为nan则整体为nan
+
     for i in tqdm(range(0, len(news_df))):
         pos_num = 0 # 专家观点情绪为正的数量
         neg_num = 0 # 专家观点情绪为负的数量
@@ -143,6 +145,7 @@ def news_deal(theme_name, news_df, views_df, date_str):
         n_id = row['news_id']
         title = row['title']
         content = row['content']
+        # print(type(n_id))
 
         title_country_dict[title] = classifyFunc.classify_title(title, dict_type=1) # 计算新闻国家标签
         title_content_dict[title] = classifyFunc.classify_title(title, dict_type=0) # 计算新闻内容标签
@@ -183,7 +186,7 @@ def news_deal(theme_name, news_df, views_df, date_str):
         WJcrisis, WJWords = crisisNewsFunc.calcu_crisis(theme_name, title, content)
 
         # 更新crisis最大值
-        if WJcrisis > crisis_max:
+        if WJcrisis > crisis_max and WJcrisis < 100:
             crisis_max = WJcrisis
         newsid_crisis[n_id] = WJcrisis
         newsid_wjwords[n_id] = WJWords
@@ -200,10 +203,16 @@ def news_deal(theme_name, news_df, views_df, date_str):
 
     # 将新闻可靠性指数、新闻危机指数加到数据中
     news_df['reliability'] = news_df['news_id'].map(newsid_reliability)
+    # print(newsid_reliability)
     
+    print(crisis_max)
+    print(np.median([x for x in newsid_crisis.values() if x > 0]))
     # 将危机指数归一化到0-100
     for n_id, value in newsid_crisis.items():
-        newsid_crisis[n_id] = float("%.2f" % (value/crisis_max * 100))
+        if newsid_crisis[n_id] > 100:
+            newsid_crisis[n_id] = 100
+        else:
+            newsid_crisis[n_id] = float("%.2f" % (value/crisis_max * 100))
     news_df['crisis'] = news_df['news_id'].map(newsid_crisis)
     
     # 将新闻涉及的专家名字, 机构名字, 危机词加入到数据中
@@ -306,13 +315,13 @@ if __name__ == "__main__":
     news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
 
     # 根据news_id检索数据库中的观点
-    news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
-    vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
-    views_df = pd.DataFrame(vps_list)
-    # views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
+    # news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
+    # vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
+    # views_df = pd.DataFrame(vps_list)
+    views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
     # print(views_df[views_df['news_id'] == "7099134353031486388"])
     # 对新闻数据新增标签
     news_deal(theme_name, news_df, views_df, date_str)
 
     # 对观点数据新增国家标签
-    views_deal(theme_name, views_df, date_str)
+    # views_deal(theme_name, views_df, date_str)
