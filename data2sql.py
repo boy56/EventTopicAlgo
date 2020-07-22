@@ -13,6 +13,7 @@ from googletrans import Translator
 from CrisisNewsFunc import CrisisNewsFunc
 import time
 from tqdm import tqdm
+import argparse
 
 # 新闻csv导入mysql, 默认文件类型为从Hbase导出的数据
 def newscsvtosql(path, theme, datatype=1):
@@ -221,10 +222,17 @@ def other_langage_tosql(path):
 # 数据库建库建表
 if __name__ == "__main__":
     
-    theme_name = "南海"
-    date_str = '202007'
-    newscsvtosql("data/" + theme_name + "_" + date_str + "_news_newdata.csv",theme_name)
-    viewscsvtosql("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
-    
-    # other_langage_tosql("data/other_language_data")
+    parser = argparse.ArgumentParser(description='data2sql')
+    parser.add_argument('--mode', type=str, default='zh', help='choose a mode: zh(中文), other(其他语言)')
+    parser.add_argument('--theme', default='南海', type=str, help='theme_name')
+    parser.add_argument('--date', default='202007', type=str, help='date_str')
+    args = parser.parse_args()
+
+    if args.mode == 'zh':
+        theme_name = args.theme
+        date_str = args.date
+        newscsvtosql("data/" + theme_name + "_" + date_str + "_news_newdata.csv",theme_name)
+        viewscsvtosql("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
+    else:
+        other_langage_tosql("data/other_language_data")
    
