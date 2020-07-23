@@ -54,6 +54,7 @@ def newscsvtosql(path, theme, datatype=1):
         tmp['persons'] = row['persons']
         tmp['orgs'] = row['orgs']
         tmp['wjwords'] = row['wjwords']
+        tmp['nextevent'] = row['nextevent']
 
         news_data.append(tmp)
 
@@ -97,6 +98,7 @@ def viewscsvtosql(path, datatype=1):
     news_data = []
     for index, row in df.iterrows():
         tmp = {}
+        tmp['viewid'] = row['id']
         tmp['personname'] = row['person_name']
         if row['country'] == 'N': 
             tmp['country'] = ""
@@ -143,64 +145,28 @@ def viewscsvtosql(path, datatype=1):
 # 英文、日文、韩文数据在mysql中单独成页
 # 传入数据所在目录的路径
 def other_langage_tosql(path):
-    data_files = os.listdir(path)
-    # 根据文件名获取新闻的语言信息
-    langage_dict = {
-        "CNN": "英语",
-        "NHK": "日语",
-        "YNA": "韩语"
-    }
-    # 媒体评分信息
-    media_score = {
-        "CNN": 75,
-        "NHK": 75,
-        "YNA": 75,
-    }
-    # 用于谷歌翻译的语言信息
-    trans_dict = {
-        "CNN": "en",
-        "NHK": "ja",
-        "YNA": "ko",       
-    }
 
-    crisisNewsFunc = CrisisNewsFunc() # 危机事件识别+评分
     news_data = [] # 最终需要插入数据库的数据列表
+    df = pd.read_csv(path)
+    df['time'] = pd.to_datetime(df['time'])
+    df = df.fillna('')  # 填充NA数据
+    
+    # 遍历读取处理    
+    for index, row in df.iterrows():
+        tmp = {}
+        tmp['newsid'] = row['id']
+        tmp['title'] = row['title']
+        tmp['time'] = datetime.strftime(row['time'],'%Y-%m-%d %H:%M:%S') 
+        tmp['content'] = row['content'] 
+        tmp['url'] = row['url']
+        tmp['imgurl'] = row['imgurl']
+        tmp['customer'] = row['customer']
+        tmp['theme_label'] = row['theme_label']
+        tmp['language'] = row['language']
+        tmp['reliability'] = row['reliability'] # 新闻可靠性指数
+        tmp['crisis'] = row['crisis']
 
-    for f in data_files: # 遍历数据文件    
-        df = pd.read_csv(path + "/" + f)
-        df['time'] = pd.to_datetime(df['time'])
-        df = df.fillna('')  # 填充NA数据
-        media_name = f.split(".")[0].split("_")[-1]
-        langage_name = langage_dict[media_name]
-        # 遍历读取处理
-        
-        for index, row in df.iterrows():
-            tmp = {}
-            tmp['title'] = row['title']
-            tmp['time'] = datetime.strftime(row['time'],'%Y-%m-%d %H:%M:%S')    # 格式化时间字符串
-            tmp['content'] = row['content']  # 清洗正文内容
-            tmp['url'] = row['url']
-            tmp['imgurl'] = row['img']
-            tmp['customer'] = row['source']
-            tmp['theme_label'] = row['theme']
-            tmp['language'] = langage_name
-            tmp['reliability'] = media_score[media_name] + random.randint(-10, 10) # 新闻可靠性指数
-
-            WJcrisis, WJWords = crisisNewsFunc.calcu_crisis(row['theme'], row['title'].lower(), row['content'].lower(), trans_dict[media_name])
-            
-            # 让指数好看点
-            if WJcrisis > 100:
-                WJcrisis = 100
-            if WJcrisis < 20 and WJcrisis > 0:
-                WJcrisis = 20 + random.randint(0, 4) * WJcrisis
-            tmp['crisis'] = WJcrisis # 新闻危机指数, 翻译后调用类进行计算
-            '''
-            if WJcrisis > 0: 
-                print(row['title'])
-                print(WJcrisis)
-                print(WJWords)
-            '''
-            news_data.append(tmp)
+        news_data.append(tmp)
         
     # write data to mysql
     mysql_db.connect()
@@ -230,7 +196,6 @@ def other_langage_tosql(path):
         for batch in chunked(news_data, 300): # 一次300条
             OtherNewsInfo.insert_many(batch).on_conflict_ignore().execute() # 批量插入, 主键重复则忽略该条
 
-
     mysql_db.close()
     
     return
@@ -252,10 +217,12 @@ if __name__ == "__main__":
             theme_name = '朝核'
         elif args.theme == 'TX':
             theme_name = '台选'
+        else:
+            print("theme_name not in [NH, CH, TX]:", theme_name)
         # print(theme_name)
         date_str = args.date
         newscsvtosql("data/" + theme_name + "_" + date_str + "_news_newdata.csv",theme_name)
         viewscsvtosql("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
     else:
-        other_langage_tosql("data/other_language_data")
+        other_langage_tosql("data/other_language_data.csv")
    

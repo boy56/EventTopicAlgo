@@ -19,7 +19,11 @@ import datetime
 from tqdm import tqdm
 from ClassifyFunc import ClassifyFunc
 from CrisisNewsFunc import CrisisNewsFunc
+from EventPredictFunc import EventPredictFunc
 import codecs
+import uuid
+import os
+import random
 
 ES_IP = '10.1.1.36'
 ES_PORT = 9200
@@ -110,6 +114,8 @@ def findCountry(entity):
 def news_deal(theme_name, news_df, views_df, date_str):
     classifyFunc = ClassifyFunc(theme=theme_name) # 根据dict获取关键词字典并进行国家、事件分类
     crisisNewsFunc = CrisisNewsFunc()
+    eventPredictFunc = EventPredictFunc()
+
     # print(views_df.shape)
     title_country_dict = {} # title/country 字典
     title_content_dict = {} # title/content 字典
@@ -125,6 +131,7 @@ def news_deal(theme_name, news_df, views_df, date_str):
     newsid_wjwords = {} # 新闻-危机词对应关系
     newsid_persons = {} # 新闻-专家对应关系
     newsid_orgs = {} # 新闻-机构对应关系
+    newsid_nextevent = {} # 新闻-后续发生事件对应关系
 
 
     # 获取最大浏览量，用于pageview的归一化
@@ -191,6 +198,8 @@ def news_deal(theme_name, news_df, views_df, date_str):
         newsid_crisis[n_id] = WJcrisis
         newsid_wjwords[n_id] = WJWords
 
+        # 获取新闻的后续事件发生概率
+        newsid_nextevent[n_id] = eventPredictFunc.calcu_next_event(theme_name, title)
 
     # 将国家标签、内容标签添加到数据中
     news_df['country_label']=news_df['title'].map(title_country_dict)
@@ -220,6 +229,9 @@ def news_deal(theme_name, news_df, views_df, date_str):
     news_df['orgs'] = news_df['news_id'].map(newsid_orgs)
     news_df['wjwords'] = news_df['news_id'].map(newsid_wjwords)
 
+    # 将新闻涉及的后续事件发生概率加入到数据中
+    news_df['nextevent'] = news_df['news_id'].map(newsid_nextevent)
+
     news_df.to_csv("data/" + theme_name + "_" + date_str + "_news_newdata.csv",index=False)
     
 # 根据专家、机构获取观点对应的国籍
@@ -243,7 +255,9 @@ def views_deal(theme_name, views_df, date_str):
     # 为每条观点获取国家属性
     org2per_count = 0
     view_country_list = []
+    view_uuid_list = []
     for i in tqdm(range(0, len(views_df))):
+
         row = views_df.iloc[i]
         per = row['person_name']
         org = str(row['org_name']) + str(row['pos'])
@@ -285,8 +299,10 @@ def views_deal(theme_name, views_df, date_str):
 
         # row['country'] = per_country
         view_country_list.append(per_country)
+        
+        view_uuid_list.append(uuid.uuid1()) # 为改观点构建id
 
-    # print("补全专家人数:" + str(org2per_count))
+    views_df['id'] = view_uuid_list # 新增一列id
     views_df['country'] = view_country_list # 新增一列国家
 
     # 统计该专题下的{国家-观点数量分布}
@@ -304,9 +320,93 @@ def views_deal(theme_name, views_df, date_str):
     # 保存{人名:国家}字典
     pklf = open("dict/per_country.pkl","wb") 
     pickle.dump(per_country_dict, pklf) 
-
+    
     views_df.to_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv", index=False) # 将增加国家数据的观点数据存入文件中
 
+
+# 对多语言数据的处理
+def other_langage_deal(path):
+    
+    data_files = os.listdir(path)
+    # 根据文件名获取新闻的语言信息
+    langage_dict = {
+        "CNN": "英语",
+        "NHK": "日语",
+        "YNA": "韩语"
+    }
+    # 媒体评分信息
+    media_score = {
+        "CNN": 75,
+        "NHK": 75,
+        "YNA": 75,
+    }
+    # 用于谷歌翻译的语言信息
+    trans_dict = {
+        "CNN": "en",
+        "NHK": "ja",
+        "YNA": "ko",       
+    }
+
+    crisisNewsFunc = CrisisNewsFunc() # 危机事件识别+评分
+    id_list = []
+    title_list = []
+    time_list = []
+    content_list = []
+    url_list = []
+    imgurl_list = []
+    customer_list = []
+    theme_label_list = []
+    language_list = []
+    reliability_list = []
+    crisis_list = []
+
+    for f in data_files: # 遍历数据文件    
+        df = pd.read_csv(path + "/" + f)
+        df['time'] = pd.to_datetime(df['time'])
+        df = df.fillna('')  # 填充NA数据
+        media_name = f.split(".")[0].split("_")[-1]
+        langage_name = langage_dict[media_name]
+        # 遍历读取处理
+        
+        for index, row in df.iterrows():
+            id_list.append(uuid.uuid1())
+            title_list.append(row['title']) 
+            time_list.append(datetime.datetime.strftime(row['time'],'%Y-%m-%d %H:%M:%S')) # 格式化时间字符串
+            content_list.append(row['content']) 
+            url_list.append(row['url'])
+            imgurl_list.append(row['img'])
+            customer_list.append(row['source'])
+            theme_label_list.append(row['theme'])
+            language_list.append(langage_name)
+            reliability_list.append(media_score[media_name] + random.randint(-10, 10)) # 新闻可靠性指数
+
+            WJcrisis, WJWords = crisisNewsFunc.calcu_crisis(row['theme'], row['title'].lower(), row['content'].lower(), trans_dict[media_name])
+            
+            # 让指数好看点
+            if WJcrisis > 100:
+                WJcrisis = 100
+            if WJcrisis < 20 and WJcrisis > 0:
+                WJcrisis = 20 + random.randint(0, 4) * WJcrisis
+            
+            crisis_list.append(WJcrisis) # 新闻危机指数, 翻译后调用类进行计算
+    
+    # 将结果存储到csv文件
+    result = {
+        "id": id_list,
+        "title": title_list,
+        "time": time_list,
+        "url": url_list,
+        "theme_label": theme_label_list,
+        "customer": customer_list,
+        "content": content_list,
+        "imgurl": imgurl_list,
+        "language": language_list,
+        "reliability": reliability_list,
+        "crisis": crisis_list
+    }
+    result_df = pd.DataFrame(result)
+    # print(result_df.shape)
+    result_df.to_csv("data/other_language_data.csv", header=True, index=False)
 
 if __name__ == "__main__":
     theme_name = "台选"
@@ -324,4 +424,7 @@ if __name__ == "__main__":
     # news_deal(theme_name, news_df, views_df, date_str)
 
     # 对观点数据新增国家标签
-    views_deal(theme_name, views_df, date_str)
+    # views_deal(theme_name, views_df, date_str)
+
+    # 对多语言数据的处理
+    other_langage_deal("data/other_language_data")

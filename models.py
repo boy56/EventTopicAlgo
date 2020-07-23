@@ -49,6 +49,7 @@ class NewsInfo(Model):
     persons = TextField(default="") # 新闻涉及的人物
     orgs = TextField(default="") # 新闻涉及到的机构
     wjwords = TextField(default="") # 新闻涉及到的危机词及权重
+    nextevent = TextField(default="") # 新闻对候选事件的贡献
 
     class Meta:
         database = mysql_db
@@ -57,8 +58,8 @@ class NewsInfo(Model):
 
 class ViewsInfo(Model):
     # 设置自增的id主键
-    viewid = AutoField()
-
+    # viewid = AutoField()
+    viewid = CharField(primary_key=True, max_length = 64)  # 主键
     personname = CharField()  # 专家名
     country = CharField() # 国家
     orgname = CharField() # 机构名
@@ -79,7 +80,7 @@ class ViewsInfo(Model):
 
 class OtherNewsInfo(Model):
     # 设置自增的id主键
-    newsid = AutoField()
+    newsid = CharField(primary_key=True, max_length = 64)  # 主键
     
     title = CharField()
     time = DateTimeField()
