@@ -190,11 +190,9 @@ def news_deal(theme_name, news_df, views_df, date_str):
             newsid_reliability[n_id] = float("%.2f" % (float(row['pageview'])/pageview_max*100*0.3)) # 当前媒体没有评级评分, 将pageview评分提高到0-30之间
 
         # 计算新闻的危机指数
-        WJcrisis, WJWords = crisisNewsFunc.calcu_crisis(theme_name, title, content)
+        # WJcrisis, WJWords = crisisNewsFunc.calcu_crisis(theme_name, title, content)
+        WJcrisis, WJWords = crisisNewsFunc.calcu_crisis_pro(theme_name, title)
 
-        # 更新crisis最大值
-        if WJcrisis > crisis_max and WJcrisis < 100:
-            crisis_max = WJcrisis
         newsid_crisis[n_id] = WJcrisis
         newsid_wjwords[n_id] = WJWords
 
@@ -217,11 +215,7 @@ def news_deal(theme_name, news_df, views_df, date_str):
     # print(crisis_max)
     # print(np.median([x for x in newsid_crisis.values() if x > 0]))
     # 将危机指数归一化到0-100
-    for n_id, value in newsid_crisis.items():
-        if newsid_crisis[n_id] > 100:
-            newsid_crisis[n_id] = 100
-        else:
-            newsid_crisis[n_id] = float("%.2f" % (value/crisis_max * 100))
+
     news_df['crisis'] = news_df['news_id'].map(newsid_crisis)
     
     # 将新闻涉及的专家名字, 机构名字, 危机词加入到数据中
@@ -421,10 +415,10 @@ if __name__ == "__main__":
     views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
     # print(views_df[views_df['news_id'] == "7099134353031486388"])
     # 对新闻数据新增标签
-    # news_deal(theme_name, news_df, views_df, date_str)
+    news_deal(theme_name, news_df, views_df, date_str)
 
     # 对观点数据新增国家标签
     # views_deal(theme_name, views_df, date_str)
 
     # 对多语言数据的处理
-    other_langage_deal("data/other_language_data")
+    # other_langage_deal("data/other_language_data")

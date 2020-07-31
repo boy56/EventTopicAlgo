@@ -5,12 +5,9 @@
 import pandas as pd
 from utils import clean_zh_text
 from datetime import datetime
-from sqlalchemy import create_engine
 from models import NewsInfo, ViewsInfo, mysql_db, OtherNewsInfo
 import math
 import os
-import random
-from CrisisNewsFunc import CrisisNewsFunc
 import time
 from tqdm import tqdm
 import argparse
@@ -177,11 +174,11 @@ def other_langage_tosql(path):
     # else: # bug调好后注释掉, 改为增量
     #    OtherNewsInfo.delete().execute() # 每次重新更新之前清空数据表
     
+    '''
     # 根据切片分批次插入
     slice_size = 300    # 切片大小
     nslices = math.floor(len(news_data) / slice_size)
     
-    '''
     for i in range(0, nslices):
         with mysql_db.atomic():
             OtherNewsInfo.insert_many(news_data[i * slice_size: (i + 1) * slice_size]).execute() # 批量插入
@@ -204,12 +201,12 @@ def other_langage_tosql(path):
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='data2sql')
-    parser.add_argument('--mode', type=str, default='zh', help='choose a mode: zh(中文), other(其他语言)')
+    parser.add_argument('--language', type=str, default='zh', help='choose a mode: zh(中文), other(其他语言)')
     parser.add_argument('--theme', default='NH', type=str, help='theme_name')
     parser.add_argument('--date', default='202007', type=str, help='date_str')
     args = parser.parse_args()
 
-    if args.mode == 'zh':
+    if args.language == 'zh':
         theme_name = ''
         if args.theme == 'NH':
             theme_name = '南海'

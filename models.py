@@ -68,7 +68,7 @@ class ViewsInfo(Model):
     viewpoint = TextField(default='') # 观点
     # person_id = CharField()
     # org_id = CharField()
-    newsid = ForeignKeyField(NewsInfo)    # 一直报错
+    newsid = ForeignKeyField(NewsInfo, on_update='CASCADE')    # 一直报错
     # newsid = CharField(max_length = 64) 
     sentiment = FloatField() # 情绪
     time = DateTimeField()
