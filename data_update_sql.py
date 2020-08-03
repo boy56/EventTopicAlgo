@@ -9,13 +9,44 @@ from tqdm import tqdm
 import argparse
 from peewee import chunked
 from CrisisNewsFunc import CrisisNewsFunc
-
-
+from EventPredictFunc import EventPredictFunc
 
 
 # 数据库字段更新
 if __name__ == "__main__":
-    theme = "南海"
-    title = "原创航行自由换人了?美海岸警卫队接替美海军巡航,目前已闯进黄海。"
+
+    parser = argparse.ArgumentParser(description='data2sql')
+    parser.add_argument('--mode', type=str, default='both', help="choose a mode: ['crisis', 'nextevent', 'both']")
+    # parser.add_argument('--theme', default='NH', type=str, help='theme_name')
+    args = parser.parse_args()
+
+
+    # theme = "南海" # 更新的主题范围, 南海、朝核、台选, both
+    
+    mode = args.mode # 更新crisis、nextevent or both
     crisisNewsFunc = CrisisNewsFunc()
-    # NewsInfo.update({'crisis': crisisNewsFunc.calcu_crisis_pro(theme, NewsInfo.title)[0], 'wjwords': crisisNewsFunc.calcu_crisis_pro(theme, NewsInfo.title)[1]}).where(NewsInfo.theme_label==theme).execute()
+    eventPredictFunc = EventPredictFunc()
+
+    # news = NewsInfo.select().where(NewsInfo.theme_label == theme) # 根据主题选取新闻
+    news = NewsInfo.select()
+
+    # 逐条更新 (是否有批量更新方法？)
+    for n in tqdm(news):
+        if mode == "crisis":
+            WJcrisis, WJWords = crisisNewsFunc.calcu_crisis_pro(n.theme_label, n.title) # 危机指数计算
+            n.crisis = WJcrisis
+            n.wjwords = WJWords
+            n.save()
+        elif mode == "nextevent":
+            n.nextevent = eventPredictFunc.calcu_next_event(n.theme_label, n.title) # 事件预测
+            n.save
+        elif mode == "both":
+            WJcrisis, WJWords = crisisNewsFunc.calcu_crisis_pro(n.theme_label, n.title)
+            n.crisis = WJcrisis
+            n.wjwords = WJWords
+            n.nextevent = eventPredictFunc.calcu_next_event(n.theme_label, n.title)
+            n.save()
+        else:
+            print("Error: mode not in ['crisis', 'nextevent', 'both']")
+
+

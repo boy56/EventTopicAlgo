@@ -75,7 +75,7 @@ class CrisisNewsFunc:
     def calcu_crisis_pro(self, theme, title: str, language='zh'):
         theme_crisis_list = self.wj_words_dict_pro[theme]
         wordpair_w_dict = {} # 词对对title的风险度
-        print(title)
+        # print(title)
         max_crisis = 0 # 可能会出现多个词对匹配的情况, 选取出现的最大值
         WJWordPairs = {} # 记录匹配到的所有词对, 并给出其原始weight
 
