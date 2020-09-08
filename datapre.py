@@ -25,6 +25,8 @@ import uuid
 import os
 import random
 
+from Translator import translate
+
 ES_IP = '10.1.1.36'
 ES_PORT = 9200
 ES_IP_PORT = '%s:%d' % (ES_IP, ES_PORT)
@@ -354,6 +356,9 @@ def other_langage_deal(path):
     reliability_list = []
     crisis_list = []
 
+    title_zh_list = [] # 翻译后的中文title
+    content_zh_list = [] # 翻译后的中文content
+
     for f in data_files: # 遍历数据文件    
         df = pd.read_csv(path + "/" + f)
         df['time'] = pd.to_datetime(df['time'])
@@ -371,18 +376,23 @@ def other_langage_deal(path):
             imgurl_list.append(row['img'])
             customer_list.append(row['source'])
             theme_label_list.append(row['theme'])
+            
             language_list.append(langage_name)
-            reliability_list.append(media_score[media_name] + random.randint(-10, 10)) # 新闻可靠性指数
+            reliability_list.append(media_score[media_name] + random.randint(-20, 20)) # 新闻可靠性指数
 
-            WJcrisis, WJWords = crisisNewsFunc.calcu_crisis(row['theme'], row['title'].lower(), row['content'].lower(), trans_dict[media_name])
+            # 将多语言数据进行翻译存储
+            title_zh = translate(row['title'])
+            title_zh_list.append(title_zh)
+            time.sleep(1) # 调用的翻译接口每秒只能访问一次
+            content_zh = translate(row['content'])
+            content_zh_list.append(content_zh)
+            time.sleep(1) 
             
-            # 让指数好看点
-            if WJcrisis > 100:
-                WJcrisis = 100
-            if WJcrisis < 20 and WJcrisis > 0:
-                WJcrisis = 20 + random.randint(0, 4) * WJcrisis
+            # 危机指数计算
+            # WJcrisis, WJWords = crisisNewsFunc.calcu_crisis(row['theme'], row['title'].lower(), row['content'].lower(), trans_dict[media_name])
+            WJcrisis, WJWords = crisisNewsFunc.calcu_crisis_pro(row['theme'], title_zh)
             
-            crisis_list.append(WJcrisis) # 新闻危机指数, 翻译后调用类进行计算
+            crisis_list.append(WJcrisis) # 新闻危机指数
     
     # 将结果存储到csv文件
     result = {
@@ -396,8 +406,11 @@ def other_langage_deal(path):
         "imgurl": imgurl_list,
         "language": language_list,
         "reliability": reliability_list,
-        "crisis": crisis_list
+        "crisis": crisis_list,
+        "title_zh": title_zh_list, # 翻译后的中文标题
+        "content_zh": content_zh_list # 翻译后的正文
     }
+
     result_df = pd.DataFrame(result)
     # print(result_df.shape)
     result_df.to_csv("data/other_language_data.csv", header=True, index=False)

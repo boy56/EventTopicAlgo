@@ -11,10 +11,10 @@ import random
 
 class CrisisNewsFunc:
     def __init__(self):
-        self.wj_words_dict = self._load_dict("dict/WJWords.json")    # 加载WJ关键词
-        self.wj_words_dict_en = self._load_dict("dict/WJWords_en.json") # 英文版
-        self.wj_words_dict_ja = self._load_dict("dict/WJWords_ja.json") # 日文版
-        self.wj_words_dict_ko = self._load_dict("dict/WJWords_ko.json") # 韩文版
+        # self.wj_words_dict = self._load_dict("dict/WJWords.json")    # 加载WJ关键词
+        # self.wj_words_dict_en = self._load_dict("dict/WJWords_en.json") # 英文版
+        # self.wj_words_dict_ja = self._load_dict("dict/WJWords_ja.json") # 日文版
+        # self.wj_words_dict_ko = self._load_dict("dict/WJWords_ko.json") # 韩文版
 
         self.wj_words_dict_pro = self._load_dict("dict/WJWordsPro.json") # 升级版危机指数计算算法
 
@@ -31,7 +31,7 @@ class CrisisNewsFunc:
             wj_words_dict = json.load(rf)
         return wj_words_dict
 
-
+    '''
     # 通过新闻的title和content识别WJ新闻, 并计算新闻的危机指数
     def calcu_crisis(self, theme, title: str, content: str, language='zh') -> str:
         
@@ -70,6 +70,7 @@ class CrisisNewsFunc:
         # 如果WJWrod_count=0,即当前新闻不是危机事件
         # 返回初步的危机指数以及对应的危机关键词
         return WJWord_count, " ".join([key+':'+str(value) for key, value in WJWords.items()])
+    '''
     
     # 危机指数计算改进版
     def calcu_crisis_pro(self, theme, title: str, language='zh'):
