@@ -162,6 +162,8 @@ def other_langage_tosql(path):
         tmp['language'] = row['language']
         tmp['reliability'] = row['reliability'] # 新闻可靠性指数
         tmp['crisis'] = row['crisis']
+        tmp['title_zh'] = row['title_zh']
+        tmp['content_zh'] = row['content_zh']
 
         news_data.append(tmp)
         

@@ -26,6 +26,7 @@ import os
 import random
 
 from Translator import translate
+import time
 
 ES_IP = '10.1.1.36'
 ES_PORT = 9200
@@ -365,9 +366,10 @@ def other_langage_deal(path):
         df = df.fillna('')  # 填充NA数据
         media_name = f.split(".")[0].split("_")[-1]
         langage_name = langage_dict[media_name]
-        # 遍历读取处理
         
-        for index, row in df.iterrows():
+        # 遍历读取处理        
+        for i in tqdm(range(0, len(df))):
+            row = df.iloc[i]
             id_list.append(uuid.uuid1())
             title_list.append(row['title']) 
             time_list.append(datetime.datetime.strftime(row['time'],'%Y-%m-%d %H:%M:%S')) # 格式化时间字符串
@@ -418,20 +420,21 @@ def other_langage_deal(path):
 if __name__ == "__main__":
     theme_name = "台选"
     date_str = '202007'
-    news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
-    news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
+    
+    # news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
+    # news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
 
     # 根据news_id检索数据库中的观点
     # news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
     # vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
     # views_df = pd.DataFrame(vps_list)
-    views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
+    # views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
     # print(views_df[views_df['news_id'] == "7099134353031486388"])
     # 对新闻数据新增标签
-    news_deal(theme_name, news_df, views_df, date_str)
+    # news_deal(theme_name, news_df, views_df, date_str)
 
     # 对观点数据新增国家标签
     # views_deal(theme_name, views_df, date_str)
 
     # 对多语言数据的处理
-    # other_langage_deal("data/other_language_data")
+    other_langage_deal("data/other_language_data")

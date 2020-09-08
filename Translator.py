@@ -32,14 +32,14 @@ def translate(word):
             if response.status_code == 200:
                 try:
                     result = json.loads(response.text)
-                    print(word[0:4900])
-                    print(result)
+                    # print(word[0:4900])
+                    # print(result)
                     wordTrans += result['trans_result'][0]['dst']
                     break
                 except Exception as e:
                     time.sleep(1)
                     print(total)
-                    print(response.text)
+                    # print(response.text)
             else:
                 print(response.status_code)
             total += 1

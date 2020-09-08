@@ -95,6 +95,10 @@ class OtherNewsInfo(Model):
     reliability = FloatField() # 新闻可靠性指数
     crisis = FloatField() # 新闻危机指数
 
+    # 翻译后的题目和正文
+    title_zh = CharField()
+    content_zh = TextField(default="")
+
     class Meta:
         database = mysql_db
         # db_table = "othernewsInfo"
