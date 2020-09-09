@@ -25,18 +25,11 @@ def newscsvtosql(path, theme, datatype=1):
     for index, row in df.iterrows():
         tmp = {}
         tmp['newsid'] = row['news_id']
-        tmp['title'] = clean_zh_text(row['title'], 2)
+        tmp['title'] = clean_zh_text(row['title'], 2).replace("原创",'').replace("转帖",'').replace("参考消息",'') # 过滤title信息
         tmp['time'] = datetime.strftime(row['time'],'%Y-%m-%d %H:%M:%S')    # 格式化时间字符串
         tmp['content'] = clean_zh_text(row['content'])  # 清洗正文内容
         tmp['url'] = row['url']
         tmp['customer'] = row['customer']
-        # tmp['emotion'] = row['emotion']
-        # tmp['entities'] = row['entities']
-        # tmp['keyword'] = row['keyword']
-        # tmp['location'] = row['location']
-        # tmp['pageview'] = row['pageview']
-        # tmp['userview'] = row['userview']
-        # tmp['words'] = row['words']
 
         tmp['theme_label'] = theme
         tmp['content_label'] = row['content_label']
