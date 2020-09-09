@@ -90,3 +90,34 @@ class LTPFunction:
             head_list.append(arc.head)
 
         return relation_list, head_list
+
+    # 外部
+    def ner_extract(self, title, content):
+
+        # 最终得到的去重后的结果
+        person_set = set()
+        location_set = set()
+        organization_set = set()
+
+        # 根据title获取对应的信息
+        title_words = ltpFunction.ltp_seg("原创航行自由换人了?美海岸警卫队接替美海军巡航,目前已闯进黄海。")
+        title_pos = ltpFunction.ltp_pos(title_words)
+        p_list, l_list, o_list = ltpFunction.ltp_ner(title_words, title_pos)
+
+        # 根据content获取对应的信息 (是否分句后再处理)
+
+
+        return list(person_set), list(location_set), list(organization_set)
+
+# 主函数
+if __name__ == "__main__":
+    
+    ltpFunction = LTPFunction()
+    title_words = ltpFunction.ltp_seg("原创航行自由换人了?美海岸警卫队接替美海军巡航,目前已闯进黄海。")
+    title_pos = ltpFunction.ltp_pos(title_words)
+
+    person_list, location_list, organization_list = ltpFunction.ltp_ner(title_words, title_pos)
+
+    print(person_list)
+    print(location_list)
+    print(organization_list)
