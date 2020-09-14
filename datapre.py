@@ -417,6 +417,24 @@ def other_langage_deal(path):
     # print(result_df.shape)
     result_df.to_csv("data/other_language_data.csv", header=True, index=False)
 
+
+
+# 对多语言数据补充人名和机构名
+def other_langage_addinfo(path):
+    news_df = pd.read_csv(path)
+    
+    for i in tqdm(range(0, len(news_df))):
+        
+        row = news_df.iloc[i]
+        n_id = row['id']
+        title = row['title_zh']
+        content = row['content_zh']
+
+        print(find_viewpoints_by_content([content]))
+        break
+
+
+
 if __name__ == "__main__":
     theme_name = "台选"
     date_str = '202007'
@@ -437,4 +455,5 @@ if __name__ == "__main__":
     # views_deal(theme_name, views_df, date_str)
 
     # 对多语言数据的处理
-    other_langage_deal("data/other_language_data")
+    # other_langage_deal("data/other_language_data")
+    other_langage_addinfo("data/other_language_data.csv")
