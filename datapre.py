@@ -423,6 +423,8 @@ def other_langage_deal(path):
 def other_langage_addinfo(path):
     news_df = pd.read_csv(path)
     
+    newsid_persons = {} # 新闻-专家对应关系
+    newsid_orgs = {} # 新闻-机构对应关系
     for i in tqdm(range(0, len(news_df))):
         
         row = news_df.iloc[i]
@@ -431,12 +433,22 @@ def other_langage_addinfo(path):
         content = row['content_zh']
 
         views_list = find_viewpoints_by_content([content])[0]
+        
+        per_set = set()
+        org_set = set()
+
         for v in views_list:
-            print(v['org'])
-            print(v['per'])
-        break
+            per_set.add(v['per'])
+            org_set.add(v['org'])
+        
+        newsid_persons[n_id] = " ".join(list(per_set))
+        newsid_orgs[n_id] = " ".join(list(org_set))
 
+    # 将新闻涉及的专家名字, 机构名字, 危机词加入到数据中
+    news_df['persons'] = news_df['news_id'].map(newsid_persons)
+    news_df['orgs'] = news_df['news_id'].map(newsid_orgs)
 
+    news_df.to_csv("data/other_language_data_pro.csv",index=False)
 
 if __name__ == "__main__":
     theme_name = "台选"
