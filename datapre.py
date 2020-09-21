@@ -445,8 +445,8 @@ def other_langage_addinfo(path):
         newsid_orgs[n_id] = " ".join(list(org_set))
 
     # 将新闻涉及的专家名字, 机构名字, 危机词加入到数据中
-    news_df['persons'] = news_df['news_id'].map(newsid_persons)
-    news_df['orgs'] = news_df['news_id'].map(newsid_orgs)
+    news_df['persons'] = news_df['id'].map(newsid_persons)
+    news_df['orgs'] = news_df['id'].map(newsid_orgs)
 
     news_df.to_csv("data/other_language_data_pro.csv",index=False)
 
