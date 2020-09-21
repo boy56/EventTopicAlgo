@@ -99,6 +99,9 @@ class OtherNewsInfo(Model):
     title_zh = CharField()
     content_zh = TextField(default="")
 
+    persons = TextField(default="") # 新闻涉及的人物
+    orgs = TextField(default="") # 新闻涉及到的机构
+
     class Meta:
         database = mysql_db
         # db_table = "othernewsInfo"

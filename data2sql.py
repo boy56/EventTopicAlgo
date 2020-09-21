@@ -160,6 +160,8 @@ def other_langage_tosql(path):
         # tmp['title_zh'] = 'title_zh'
         tmp['content_zh'] = row['content_zh']
         # tmp['content_zh'] = 'content_zh'
+        tmp['persons'] = row['persons']
+        tmp['orgs'] = row['orgs']
 
         news_data.append(tmp)
         
@@ -172,20 +174,6 @@ def other_langage_tosql(path):
     # else: # bug调好后注释掉, 改为增量
     #    OtherNewsInfo.delete().execute() # 每次重新更新之前清空数据表
     
-    '''
-    # 根据切片分批次插入
-    slice_size = 300    # 切片大小
-    nslices = math.floor(len(news_data) / slice_size)
-    
-    for i in range(0, nslices):
-        with mysql_db.atomic():
-            OtherNewsInfo.insert_many(news_data[i * slice_size: (i + 1) * slice_size]).execute() # 批量插入
-        # print(i)
-    # 插入最后一个切片的数据
-    with mysql_db.atomic():
-        OtherNewsInfo.insert_many(news_data[nslices*slice_size:]).execute() # 批量插入
-    # print(nslices)
-    '''
 
     with mysql_db.atomic():
         for batch in chunked(news_data, 300): # 一次300条
@@ -219,5 +207,5 @@ if __name__ == "__main__":
         newscsvtosql("data/" + theme_name + "_" + date_str + "_news_newdata.csv",theme_name)
         viewscsvtosql("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
     else:
-        other_langage_tosql("data/other_language_data.csv")
+        other_langage_tosql("data/other_language_data_pro.csv")
    
