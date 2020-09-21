@@ -430,7 +430,7 @@ def other_langage_addinfo(path):
         title = row['title_zh']
         content = row['content_zh']
 
-        views_list = find_viewpoints_by_content([content])[0]
+        views_list = json.loads(find_viewpoints_by_content([content]))[0]
         for v in views_list:
             print(v['org'])
             print(v['per'])
