@@ -84,12 +84,12 @@ def find_viewpoints_by_news_id(news_ids=None,size=3000):
 def find_viewpoints_by_content(news_list):
     # 根据文本内容得到对应观点信息的API, 实验室内部本地访问接口
     url = 'http://10.1.1.56:8800/news_to_vp_api/'
-    news_list = ['中央军委主席习近平认为这次阅兵十分成功。']
+    # news_list = ['中央军委主席习近平认为这次阅兵十分成功。']
     str1 = json.dumps(news_list,ensure_ascii=False)
     data = {'news_list':str1}
 
     response = requests.post(url,data=data)
-    print(response.text)
+    # print(response.text)
     return response.text
 
 
@@ -430,7 +430,10 @@ def other_langage_addinfo(path):
         title = row['title_zh']
         content = row['content_zh']
 
-        print(find_viewpoints_by_content([content]))
+        views_list = find_viewpoints_by_content([content])[0]
+        for v in views_list:
+            print(v['org'])
+            print(v['per'])
         break
 
 
