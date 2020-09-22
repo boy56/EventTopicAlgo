@@ -303,7 +303,11 @@ def views_deal(theme_name, views_df, date_str):
     views_df['country'] = view_country_list # 新增一列国家
 
     # 统计该专题下的{国家-观点数量分布}
-    country_view_dict = {}
+    if os.path.exists("dict/" + theme_name+ "_countryviews_dict.pkl"):
+        country_view_dict = pickle.load(open("dict/" + theme_name+ "_countryviews_dict.pkl",'rb'))
+    else:
+        country_view_dict = {} # 若文件不存在则建立
+    
     for country in views_df["country"]:
         if country in country_view_dict:
             country_view_dict[country] += 1
