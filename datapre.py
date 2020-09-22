@@ -451,24 +451,32 @@ def other_langage_addinfo(path):
     news_df.to_csv("data/other_language_data_pro.csv",index=False)
 
 if __name__ == "__main__":
-    theme_name = "台选"
+    theme_name = "南海"
     date_str = '202007'
     
-    # news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
-    # news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
+    news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
+    news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
+
+    # 在此处根据关键词过滤news_df
+    with codecs.open('dict/NewsFilter.json','r','utf-8') as rf: # 加载新闻过滤关键词
+        news_filter_words_dict = json.load(rf)
+    filter_str = "|".join(news_filter_words_dict[theme])
+    news_df = news_df[news_df['title'].str.contains(filter_str)]
 
     # 根据news_id检索数据库中的观点
-    # news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
-    # vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
-    # views_df = pd.DataFrame(vps_list)
+    news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
+    vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
+    views_df = pd.DataFrame(vps_list)
     # views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
     # print(views_df[views_df['news_id'] == "7099134353031486388"])
+    
+    
     # 对新闻数据新增标签
-    # news_deal(theme_name, news_df, views_df, date_str)
+    news_deal(theme_name, news_df, views_df, date_str)
 
     # 对观点数据新增国家标签
-    # views_deal(theme_name, views_df, date_str)
+    views_deal(theme_name, views_df, date_str)
 
     # 对多语言数据的处理
     # other_langage_deal("data/other_language_data")
-    other_langage_addinfo("data/other_language_data.csv")
+    # other_langage_addinfo("data/other_language_data.csv")
