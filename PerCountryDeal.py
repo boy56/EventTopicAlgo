@@ -111,12 +111,21 @@ if __name__ == '__main__':
 
 
     # 更新views_newdata.csv中的国家字段
-
+    theme_name = "朝核"
+    date_str = '202007'
+    views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
+    
+    for i in tqdm(range(0, len(views_df))):
+        row = views_df.iloc[i]
+        per = row['person_name']
+        org = str(row['org_name']) + str(row['pos'])
+        views_df.loc[i, 'country'] = PerCountryDealFunc.find_country(per, org)
+    
+    
     # 更新数据库中的country字段
-
     views = ViewsInfo.select()
     for v in tqdm(views):
-        per_country = PerCountryDealFunc.find_country(v.personname, v.orgname + v.pos) # 危机指数计算
+        per_country = PerCountryDealFunc.find_country(v.personname, str(v.orgname) + str(v.pos))
         if per_country == "N":
             per_country = ""    
         n.country = per_country
