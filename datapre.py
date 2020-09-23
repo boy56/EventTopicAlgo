@@ -266,6 +266,7 @@ def views_deal(theme_name, views_df, date_str):
             if per_country_dict[per] is not "N":    # 该专家的国家名称不为N 
                 # views_df.iloc[i]['country'] = per_country_dict[per] # 获取专家所在的国家
                 view_country_list.append(per_country_dict[per])
+                view_uuid_list.append(uuid.uuid1()) # 为改观点构建id
                 continue # 该专家已经存在库中则进行跳过
 
         # 先判断org中是否包含set中的国家
@@ -281,6 +282,7 @@ def views_deal(theme_name, views_df, date_str):
                 per_country_dict[per] = per_country # 根据org字段补全专家国籍
             # row['country'] = per_country
             view_country_list.append(per_country)
+            view_uuid_list.append(uuid.uuid1()) # 为改观点构建id
             continue
 
         # 根据per来查找知识图谱中的信息
@@ -296,7 +298,6 @@ def views_deal(theme_name, views_df, date_str):
 
         # row['country'] = per_country
         view_country_list.append(per_country)
-        
         view_uuid_list.append(uuid.uuid1()) # 为改观点构建id
 
     views_df['id'] = view_uuid_list # 新增一列id

@@ -2,7 +2,6 @@ import json
 import codecs
 import datetime
 import pandas as pd
-from fuzzywuzzy import fuzz
 from LTPFunc import LTPFunction
 import utils
 from tqdm import tqdm
@@ -216,6 +215,7 @@ pklf = open("dict/echarts_zhcountry_set.pkl","wb")
 pickle.dump(zhcountry_set, pklf)
 '''
 
+'''
 from googletrans import Translator
 translator = Translator(service_urls=[
       'translate.google.cn',]) # 如果可以上外网，还可添加 'translate.google.com' 等
@@ -234,6 +234,14 @@ for key in wj_words_dict.keys():
 
 with codecs.open('dict/WJWords_ko.json','w','utf-8') as wf:
     json.dump(result_dict, wf, indent=4, ensure_ascii=False)
+'''
+
+#加载之前存储的{专家：国家}字典
+pkl_rf = open('dict/per_country.pkl','rb')
+per_country_dict = pickle.load(pkl_rf)
+
+with codecs.open('dict/per_country.json','w','utf-8') as wf:
+    json.dump(per_country_dict, wf, indent=4, ensure_ascii=False)
 
 
 
