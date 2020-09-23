@@ -473,7 +473,6 @@ if __name__ == "__main__":
     vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
     views_df = pd.DataFrame(vps_list)
     # views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
-    # print(views_df[views_df['news_id'] == "7099134353031486388"])
     
     
     # 对新闻数据新增标签
