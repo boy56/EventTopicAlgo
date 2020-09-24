@@ -9,6 +9,7 @@ import codecs
 import pickle
 import json
 from models import NewsInfo, ViewsInfo, mysql_db, OtherNewsInfo
+import requests
 
 class PerCountryDeal:
     def __init__(self):
@@ -35,7 +36,7 @@ class PerCountryDeal:
 
 
     # 根据ownthink知识图谱查找人名所对应的国籍
-    def findCountryFromOwnthink(entity):
+    def findCountryFromOwnthink(self, entity):
         result = requests.get("http://10.1.1.56:9000/eav?entity=" + entity + "&attribute=国籍")
         r = json.loads(result.text)
         if r != []:
@@ -89,10 +90,10 @@ class PerCountryDeal:
         if isinstance(per, str): # 如果per字段不为空
             country = self.findCountryFromOwnthink(per)
             # 在进行国家对比的时候先进行转换
-            if country in zhcountry_convert_dict:
-                country = zhcountry_convert_dict[country]
+            if country in self.zhcountry_convert_dict:
+                country = self.zhcountry_convert_dict[country]
             # 如果该国家在echarts中的中文国家字典中
-            if country in zhcountry_set:
+            if country in self.zhcountry_set:
                 per_country = country
             self.per_country_dict[per] = per_country
 
@@ -106,10 +107,10 @@ if __name__ == '__main__':
     
     PerCountryDealFunc = PerCountryDeal()
     per = " "
-    pos = "韩国当局"
+    pos = "韩总统府"
     print(PerCountryDealFunc.find_country(per, pos))
 
-
+    '''
     # 更新views_newdata.csv中的国家字段
     theme_name = "朝核"
     date_str = '202007'
@@ -120,7 +121,7 @@ if __name__ == '__main__':
         per = row['person_name']
         org = str(row['org_name']) + str(row['pos'])
         views_df.loc[i, 'country'] = PerCountryDealFunc.find_country(per, org)
-    
+    '''
     
     # 更新数据库中的country字段
     views = ViewsInfo.select()
