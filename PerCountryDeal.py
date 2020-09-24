@@ -44,8 +44,10 @@ class PerCountryDeal:
         if r != []:
             return r[0]
         else:
+            # print("????????????????????")
+            # print(len(entity))
             result = requests.get("https://api.ownthink.com/kg/knowledge?entity=" + entity)
-            print(result.text)
+            # print(result.text)
             result = json.loads(result.text)
             if 'avp' not in result['data']: return 'N'
             country = [i[1] if i[0] == "国籍" else "" for i in result["data"]["avp"]]
@@ -63,7 +65,7 @@ class PerCountryDeal:
         per_country = "N"
 
         # 如果该专家之前已经处理过
-        if per != '' and per in self.per_country_dict: # person不为空
+        if isinstance(per, str) and per in self.per_country_dict: # person不为空
             if self.per_country_dict[per] is not "N":    # 该专家的国家名称不为N 
                 per_country = self.per_country_dict[per]   
                 
@@ -90,7 +92,7 @@ class PerCountryDeal:
             return per_country
 
         # 根据per来查找知识图谱中的信息, 需要在ACT内网环境下执行
-        if isinstance(per, str): # 如果per字段不为空
+        if isinstance(per, str) and len(per) > 0: # 如果per字段不为空
             country = self.findCountryFromOwnthink(per)
             # 在进行国家对比的时候先进行转换
             if country in self.zhcountry_convert_dict:
@@ -109,23 +111,37 @@ class PerCountryDeal:
 if __name__ == '__main__':
     
     PerCountryDealFunc = PerCountryDeal()
-    per = " "
-    pos = "韩总统府"
-    print(PerCountryDealFunc.find_country(per, pos))
-
     '''
+    per = "马英九"
+    pos = ""
+    print(PerCountryDealFunc.find_country(per, pos))
+    '''
+    
     # 更新views_newdata.csv中的国家字段
     theme_name = "朝核"
     date_str = '202007'
     views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
-    
-    for i in tqdm(range(0, len(views_df))):
-        row = views_df.iloc[i]
-        per = row['person_name']
-        org = str(row['org_name']) + str(row['pos'])
-        views_df.loc[i, 'country'] = PerCountryDealFunc.find_country(per, org)
+    change_count = 0
+    with open('result/PerCountryDealChangeLog.txt','w') as wf:
+        for i in tqdm(range(0, len(views_df))):
+            row = views_df.iloc[i]
+            per = row['person_name']
+            org = str(row['org_name']) + str(row['pos'])
+            old_country = row['country']
+            new_country = PerCountryDealFunc.find_country(per, org)
+
+            if new_country != old_country:
+                views_df.loc[i, 'country'] = new_country
+                wf.write("per: " + str(per) + "\n")
+                wf.write("org: " + str(org) + "\n")
+                wf.write("old_country: " + str(old_country) + "\n")
+                wf.write("new_country: " + str(new_country) + "\n")
+                wf.write("\n")
+                change_count += 1
+        wf.write(change_count)
+    views_df.to_csv("data/" + theme_name + "_" + date_str + "_views_newdata_pro.csv", index=False) # 将增加国家数据的观点数据存入文件中
+
     '''
-    
     # 更新数据库中的country字段
     views = ViewsInfo.select()
     change_count = 0
@@ -138,3 +154,4 @@ if __name__ == '__main__':
             v.save()
             change_count += 1
     print(change_count)
+    '''
