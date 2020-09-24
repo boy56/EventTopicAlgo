@@ -45,6 +45,7 @@ class PerCountryDeal:
             return r[0]
         else:
             result = requests.get("https://api.ownthink.com/kg/knowledge?entity=" + entity)
+            print(result.text)
             result = json.loads(result.text)
             if 'avp' not in result['data']: return 'N'
             country = [i[1] if i[0] == "国籍" else "" for i in result["data"]["avp"]]
