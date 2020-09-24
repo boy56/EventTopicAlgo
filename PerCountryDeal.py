@@ -127,9 +127,13 @@ if __name__ == '__main__':
     
     # 更新数据库中的country字段
     views = ViewsInfo.select()
+    change_count = 0
     for v in tqdm(views):
         per_country = PerCountryDealFunc.find_country(v.personname, str(v.orgname) + str(v.pos))
         if per_country == "N":
             per_country = ""    
-        n.country = per_country
-        n.save()
+        if v.country != per_country:
+            v.country = per_country
+            v.save()
+            change_count += 1
+    print(change_count)
