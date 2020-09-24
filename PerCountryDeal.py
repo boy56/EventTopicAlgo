@@ -122,7 +122,7 @@ if __name__ == '__main__':
     date_str = '202007'
     views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
     change_count = 0
-    with open('result/PerCountryDealChangeLog.txt','w') as wf:
+    with codecs.open('result/PerCountryDealChangeLog.txt','w','utf-8') as wf:
         for i in tqdm(range(0, len(views_df))):
             row = views_df.iloc[i]
             per = row['person_name']
