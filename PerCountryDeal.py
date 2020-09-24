@@ -138,7 +138,7 @@ if __name__ == '__main__':
                 wf.write("new_country: " + str(new_country) + "\n")
                 wf.write("\n")
                 change_count += 1
-        wf.write(change_count)
+        wf.write(str(change_count))
     views_df.to_csv("data/" + theme_name + "_" + date_str + "_views_newdata_pro.csv", index=False) # 将增加国家数据的观点数据存入文件中
 
     '''
