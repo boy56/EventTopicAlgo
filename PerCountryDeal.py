@@ -10,6 +10,7 @@ import pickle
 import json
 from models import NewsInfo, ViewsInfo, mysql_db, OtherNewsInfo
 import requests
+import pandas as pd
 
 class PerCountryDeal:
     def __init__(self):
