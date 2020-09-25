@@ -65,7 +65,7 @@ class PerCountryDeal:
         per_country = "N"
 
         # 如果该专家之前已经处理过
-        if isinstance(per, str) and per in self.per_country_dict: # person不为空
+        if isinstance(per, str) and len(per) and per in self.per_country_dict: # person不为空
             if self.per_country_dict[per] is not "N":    # 该专家的国家名称不为N 
                 per_country = self.per_country_dict[per]   
                 
@@ -118,11 +118,11 @@ if __name__ == '__main__':
     '''
     
     # 更新views_newdata.csv中的国家字段
-    theme_name = "朝核"
+    theme_name = "台选"
     date_str = '202007'
     views_df = pd.read_csv("data/" + theme_name + "_" + date_str + "_views_newdata.csv")
     change_count = 0
-    with codecs.open('result/PerCountryDealChangeLog.txt','w','utf-8') as wf:
+    with codecs.open('result/' + theme_name + '_PerCountryLog.txt','w','utf-8') as wf:
         for i in tqdm(range(0, len(views_df))):
             row = views_df.iloc[i]
             per = row['person_name']

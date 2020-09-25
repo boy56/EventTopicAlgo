@@ -92,7 +92,7 @@ def find_viewpoints_by_content(news_list):
     # print(response.text)
     return response.text
 
-
+'''
 # 根据ownthink知识图谱查找人名所对应的国籍
 def findCountry(entity):
     result = requests.get("http://10.1.1.56:9000/eav?entity=" + entity + "&attribute=国籍")
@@ -112,7 +112,7 @@ def findCountry(entity):
             return r[0]
         else:
             return "N"
-
+'''
 # 根据新闻信息和对应的观点信息计算新闻的正负向情感数值以及影响力指数
 def news_deal(theme_name, news_df, views_df, date_str):
     classifyFunc = ClassifyFunc(theme=theme_name) # 根据dict获取关键词字典并进行国家、事件分类
@@ -250,6 +250,7 @@ def views_deal(theme_name, views_df, date_str):
     per_country_dict = pickle.load(pkl_rf)
 
     # 为每条观点获取国家属性
+    PerCountryDealFunc = PerCountryDeal()
     org2per_count = 0
     view_country_list = []
     view_uuid_list = []
@@ -259,6 +260,7 @@ def views_deal(theme_name, views_df, date_str):
         per = row['person_name']
         org = str(row['org_name']) + str(row['pos'])
         # print(org)
+        '''
         per_country = "N"
         
         # 如果该专家之前已经处理过
@@ -297,6 +299,8 @@ def views_deal(theme_name, views_df, date_str):
             per_country_dict[per] = per_country
 
         # row['country'] = per_country
+        '''
+        per_country = PerCountryDealFunc.find_country(per, org)
         view_country_list.append(per_country)
         view_uuid_list.append(uuid.uuid1()) # 为改观点构建id
 
