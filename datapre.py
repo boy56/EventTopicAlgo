@@ -27,6 +27,7 @@ import random
 
 from Translator import translate
 import time
+from PerCountryDeal import PerCountryDeal
 
 ES_IP = '10.1.1.36'
 ES_PORT = 9200
@@ -160,9 +161,8 @@ def news_deal(theme_name, news_df, views_df, date_str):
         title_country_dict[title] = classifyFunc.classify_title(title, dict_type=1) # 计算新闻国家标签
         title_content_dict[title] = classifyFunc.classify_title(title, dict_type=0) # 计算新闻内容标签
         # print(type(n_id), n_id)
-        new_views = views_df[views_df['news_id'] == n_id]
-        # print(new_views.shape)
-        
+        new_views = views_df[views_df['news_id'] == str(n_id)]
+        print(new_views.shape)
         for v_s in new_views['sentiment']:
             # 判断专家观点的情绪
             if v_s > 0.6:
@@ -461,7 +461,7 @@ def other_langage_addinfo(path):
 
 if __name__ == "__main__":
     theme_name = "南海"
-    date_str = '202007'
+    date_str = '202009'
     
     news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
     news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
@@ -469,7 +469,7 @@ if __name__ == "__main__":
     # 在此处根据关键词过滤news_df
     with codecs.open('dict/NewsFilter.json','r','utf-8') as rf: # 加载新闻过滤关键词
         news_filter_words_dict = json.load(rf)
-    filter_str = "|".join(news_filter_words_dict[theme])
+    filter_str = "|".join(news_filter_words_dict[theme_name])
     news_df = news_df[news_df['title'].str.contains(filter_str)]
 
     # 根据news_id检索数据库中的观点
