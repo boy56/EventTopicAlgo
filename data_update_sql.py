@@ -39,7 +39,7 @@ if __name__ == "__main__":
             n.save()
         elif mode == "nextevent":
             n.nextevent = eventPredictFunc.calcu_next_event(n.theme_label, n.title) # 事件预测
-            n.save
+            n.save()
         elif mode == "both":
             WJcrisis, WJWords = crisisNewsFunc.calcu_crisis_pro(n.theme_label, n.title)
             n.crisis = WJcrisis
