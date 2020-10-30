@@ -109,12 +109,13 @@ def get_news_data(fout, fkeywords):
     batch_search(query_list, '2019-01-01', '2019-06-01', writer, name)
     batch_search(query_list, '2019-06-02', '2019-12-31', writer, name)
     batch_search(query_list, '2020-01-01', '2020-07-01', writer, name) # 后续扩增数据可以注释掉这些代码, 然后在后面重新查询
-    '''
     batch_search(query_list, '2020-07-01', '2020-10-01', writer, name)
+    '''
+    batch_search(query_list, '2020-09-27', '2020-10-20', writer, name)
     csvFile.close()
 
 # 主函数
 if __name__ == "__main__":
     theme_name = "台选"
-    date_str = '202009'    
+    date_str = '202010'    
     get_news_data("data/" + theme_name + '_' + date_str + "_news.csv", 'dict/' + theme_name + '新闻关键词.txt')
