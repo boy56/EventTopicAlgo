@@ -162,7 +162,7 @@ def news_deal(theme_name, news_df, views_df, date_str):
         title_content_dict[title] = classifyFunc.classify_title(title, dict_type=0) # 计算新闻内容标签
         # print(type(n_id), n_id)
         new_views = views_df[views_df['news_id'] == str(n_id)]
-        print(new_views.shape)
+        # print(new_views.shape)
         for v_s in new_views['sentiment']:
             # 判断专家观点的情绪
             if v_s > 0.6:
@@ -461,7 +461,7 @@ def other_langage_addinfo(path):
 
 if __name__ == "__main__":
     theme_name = "台选"
-    date_str = '202010'
+    date_str = '202011'
     
     news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
     news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行

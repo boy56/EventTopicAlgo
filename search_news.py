@@ -117,6 +117,6 @@ def get_news_data(fout, fkeywords):
 
 # 主函数
 if __name__ == "__main__":
-    theme_name = "南海"
+    theme_name = "台选"
     date_str = '202011'    
     get_news_data("data/" + theme_name + '_' + date_str + "_news.csv", 'dict/' + theme_name + '新闻关键词.txt')
