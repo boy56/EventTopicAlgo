@@ -76,6 +76,11 @@ def clean_zh_text(text, cleantype=1):
         text = text.replace('，',',').replace('。','.').replace('？','?').replace('！','!').replace('：',':') # 将英文标点转换为中文标点
         comp = re.compile('[^A-Z^.^,^!^?^:^a-z^0-9^\u4e00-\u9fa5]')
         result = comp.sub('', text)
+    elif cleantype == 3:
+        
+        # text = text.replace('，',',').replace('。','.').replace('？','?').replace('！','!').replace('：',':') # 将英文标点转换为中文标点
+        comp = re.compile('[^·^\u4e00-\u9fa5]')
+        result = comp.sub('', text)
     else:
         print("type error in utils.clean_zh_text")
     return result
