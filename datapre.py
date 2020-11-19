@@ -157,7 +157,7 @@ def news_deal(theme_name, news_df, views_df, date_str):
         title = row['title']
         content = row['content']
         # print(type(n_id))
-
+        # if len(title) < 10: continue
         title_country_dict[title] = classifyFunc.classify_title(title, dict_type=1) # 计算新闻国家标签
         title_content_dict[title] = classifyFunc.classify_title(title, dict_type=0) # 计算新闻内容标签
         # print(type(n_id), n_id)
@@ -466,18 +466,15 @@ if __name__ == "__main__":
     news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
     news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
     
-    df_0 = news_df[news_df['content'].str.contains('南海')] # 20201119补充南海-美国大选新闻专用代码块
+    # news_df = news_df[news_df['content'].str.contains('南海')] # 20201119补充南海-美国大选新闻专用代码块
+    
     
     # 在此处根据关键词过滤news_df
     with codecs.open('dict/NewsFilter.json','r','utf-8') as rf: # 加载新闻过滤关键词
         news_filter_words_dict = json.load(rf)
     filter_str = "|".join(news_filter_words_dict[theme_name])
     news_df = news_df[news_df['title'].str.contains(filter_str)]
-
-    # 20201119补充南海-美国大选新闻专用代码块
-    df_1 = news_df.sample(100)
-    news_df = pd.concat([df_0, df_1])
-
+    
     # 根据news_id检索数据库中的观点
     news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
     vps_list = find_viewpoints_by_news_id(news_id)   # 从观点库中根据news_id查找对应的观点
