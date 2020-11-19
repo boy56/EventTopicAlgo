@@ -112,11 +112,12 @@ def get_news_data(fout, fkeywords):
     batch_search(query_list, '2020-07-01', '2020-10-01', writer, name)
     batch_search(query_list, '2020-09-27', '2020-10-20', writer, name)
     '''
-    batch_search(query_list, '2020-10-20', '2020-11-12', writer, name)
+    batch_search(query_list, '2020-10-01', '2020-11-12', writer, name)
     csvFile.close()
 
 # 主函数
 if __name__ == "__main__":
-    theme_name = "台选"
-    date_str = '202011'    
-    get_news_data("data/" + theme_name + '_' + date_str + "_news.csv", 'dict/' + theme_name + '新闻关键词.txt')
+    theme_name = "南海"
+    date_str = '202011_pro'    
+    # get_news_data("data/" + theme_name + '_' + date_str + "_news.csv", 'dict/' + theme_name + '新闻关键词.txt')
+    get_news_data("data/" + theme_name + '_' + date_str + "_news.csv", 'dict/foo.txt')
