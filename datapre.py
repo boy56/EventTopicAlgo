@@ -460,8 +460,8 @@ def other_langage_addinfo(path):
     news_df.to_csv("data/other_language_data_pro.csv",index=False)
 
 if __name__ == "__main__":
-    theme_name = "台选"
-    date_str = '202011'
+    theme_name = "南海"
+    date_str = '202011_pro'
     
     news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
     news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
