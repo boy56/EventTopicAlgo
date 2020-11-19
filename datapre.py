@@ -318,11 +318,11 @@ def views_deal(theme_name, views_df, date_str):
             country_view_dict[country] += 1
         else:
             country_view_dict[country] = 1
-
+    '''
     # 存储不同专题的国家-观点数量信息,用于前端直接读取
     pklf = open("dict/" + theme_name+ "_countryviews_dict.pkl","wb") 
     pickle.dump(country_view_dict, pklf)
-
+    '''
     # 保存{人名:国家}字典
     pklf = open("dict/per_country.pkl","wb") 
     pickle.dump(per_country_dict, pklf) 
@@ -465,12 +465,18 @@ if __name__ == "__main__":
     
     news_df = pd.read_csv("data/" + theme_name + '_' + date_str + "_news.csv")
     news_df = news_df.dropna(subset=["content", "title"]) # 删除content, title中值为Nan的行
-
+    
+    df_0 = news_df[news_df['content'].str.contains('南海')] # 20201119补充南海-美国大选新闻专用代码块
+    
     # 在此处根据关键词过滤news_df
     with codecs.open('dict/NewsFilter.json','r','utf-8') as rf: # 加载新闻过滤关键词
         news_filter_words_dict = json.load(rf)
     filter_str = "|".join(news_filter_words_dict[theme_name])
     news_df = news_df[news_df['title'].str.contains(filter_str)]
+
+    # 20201119补充南海-美国大选新闻专用代码块
+    df_1 = news_df.sample(100)
+    news_df = pd.concat([df_0, df_1])
 
     # 根据news_id检索数据库中的观点
     news_id = list(news_df.news_id) # 将数据中的news_id提取出来送入观点库中提取
